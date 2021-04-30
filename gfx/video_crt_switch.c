@@ -327,7 +327,7 @@ void crt_switch_res_core(
       int crt_switch_porch_adjust,
       int monitor_index, bool dynamic)
 {
-   if (rescheck > 60)
+   if (rescheck > 2)
    {
       /* ra_core_hz float passed from within
       * video_driver_monitor_adjust_system_rates() */
