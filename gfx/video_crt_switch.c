@@ -33,11 +33,10 @@
 
 #include <switchres/switchres_wrapper.h>
 
-bool sr2_active;
+bool sr2_active = false;
 LIBTYPE dlp;
-srAPI* SRobjList[256] ;
 srAPI* SRobj;
-int srnum = 0;
+sr_mode srm;
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -94,8 +93,16 @@ static void switch_res_crt(
    unsigned char interlace = 0,   ret;
    const char* err_msg;
 
-   //printf("About to open %s.\n", LIBSWR);
+   int w = width, h = height;
+   double rr = p_switch->ra_core_hz;
+   if (height >= 300)
+      interlace = 1;
+   else
+      interlace = 0;
 
+   //printf("About to open %s.\n", LIBSWR);
+   if (sr2_active == false)
+   {
      // Load the lib
       dlp = OPENLIB(LIBSWR);
 
@@ -106,114 +113,73 @@ static void switch_res_crt(
          
       }
       
-      //printf("Loading %s succeded.\n", LIBSWR);
 
- /*    
+
       // Load the init()
       LIBERROR();
       SRobj =  (srAPI*)LIBFUNC(dlp, "srlib");
+      sr2_active = true;
       if ((err_msg = LIBERROR()) != NULL) {
-         //printf("Failed to load srAPI: %s\n", err_msg);
-         CLOSELIB(dlp);
+            //printf("Failed to load srAPI: %s\n", err_msg);
+            CLOSELIB(dlp);
       
+            sr2_active = false;
       }
    
-         // Testing the function
-      //printf("Init a new switchres_manager object:\n");
+            // Testing the function
+         //printf("Init a new switchres_manager object:\n");
       SRobj->init();
       SRobj->sr_init_disp();
-   
-	// Call mode + get result values
-	int w = width, h = height;
-	double rr = p_switch->ra_tmp_core_hz;
-   if (height >= 300)
-	   interlace = 1;
-   else
-      interlace = 0;
+      //printf("Orignial resolution expected: %dx%d@%f-%d\n", w, h, rr, interlace);
 
-
-	sr_mode srm;
-
-
-   sr2_active = true;
-   */
-
-         // Load the init()
-   LIBERROR();
-   SRobjList[srnum] =  (srAPI*)LIBFUNC(dlp, "srlib");
-   if ((err_msg = LIBERROR()) != NULL) {
-         //printf("Failed to load srAPI: %s\n", err_msg);
-         CLOSELIB(dlp);
-      
-   }
-   
-         // Testing the function
-      //printf("Init a new switchres_manager object:\n");
-   SRobjList[srnum]->init();
-   SRobjList[srnum]->sr_init_disp();
-   
-	// Call mode + get result values
-	int w = width, h = height;
-	double rr = p_switch->ra_tmp_core_hz;
-   if (height >= 300)
-	   interlace = 1;
-   else
-      interlace = 0;
-
-
-	sr_mode srm;
-
-
-   //printf("Orignial resolution expected: %dx%d@%f-%d\n", w, h, rr, interlace);
-
-	ret =  SRobjList[srnum]->sr_add_mode(w, h, rr, interlace, &srm);
-	if(!ret) 
-	{
-		//printf("ERROR: couldn't add the required mode. Exiting!\n");
-		  SRobjList[srnum]->deinit();
-
-	}
-	//printf("Got resolution: %dx%d%c@%f\n", srm.width, srm.height, srm.interlace, srm.refresh);
-	//printf("Press Any Key to switch to new mode\n");
-
-
-   ret =   SRobjList[srnum]->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
-	if(!ret) 
-	{
-		//printf("ERROR: couldn't switch to the required mode. Exiting!\n");
-		  SRobjList[srnum]->deinit();
-
-	}
-/*   for(int i = 0; i < srnum-1 ; i++)
-   {
-      if (SRobjList[srnum])
+      ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
+      if(!ret) 
       {
-         SRobjList[srnum]->deinit();
-         //CLOSELIB(dlp);
+         //printf("ERROR: couldn't add the required mode. Exiting!\n");
+         SRobj->deinit();
+
       }
-   }
-*/
-   srnum++;
-   CLOSELIB(dlp);
-/*  
-   if (srnum == 1)
-   {
-      if (SRobjList[0])
+      //printf("Got resolution: %dx%d%c@%f\n", srm.width, srm.height, srm.interlace, srm.refresh);
+      //printf("Press Any Key to switch to new mode\n");
+
+
+      ret =   SRobj->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
+      if(!ret) 
       {
-         SRobjList[0]->deinit();
+         //printf("ERROR: couldn't switch to the required mode. Exiting!\n");
+         SRobj->deinit();
+
       }
    }else{
-      if (SRobjList[1])
+      // Call mode + get result values  
+
+
+      //printf("Orignial resolution expected: %dx%d@%f-%d\n", w, h, rr, interlace);
+
+      ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
+      if(!ret) 
       {
-         SRobjList[1]->deinit();
+         //printf("ERROR: couldn't add the required mode. Exiting!\n");
+         SRobj->deinit();
+
+      }
+      //printf("Got resolution: %dx%d%c@%f\n", srm.width, srm.height, srm.interlace, srm.refresh);
+      //printf("Press Any Key to switch to new mode\n");
+
+
+      ret =   SRobj->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
+      if(!ret) 
+      {
+         //printf("ERROR: couldn't switch to the required mode. Exiting!\n");
+         SRobj->deinit();
+
       }
    }
+   video_monitor_set_refresh_rate(p_switch->ra_core_hz);
+   //crt_switch_driver_reinit();
+   //srnum++;
+   //CLOSELIB(dlp);
 
-   if (srnum == 1)
-      srnum = 0;
-   else  
-      srnum++;
-*/
    
 
    /*
@@ -239,6 +205,16 @@ static void switch_res_crt(
 
 /* Create correct aspect to fit video 
  * if resolution does not exist */
+
+ void crt_destroy_modes(void)
+ {
+    if (sr2_active == true)
+    {
+      SRobj->deinit();
+      CLOSELIB(dlp);
+    }
+ }
+
 static void crt_screen_setup_aspect(
       videocrt_switch_t *p_switch,
       unsigned width, unsigned height)
