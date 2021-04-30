@@ -38,6 +38,8 @@ LIBTYPE dlp;
 srAPI* SRobj;
 sr_mode srm;
 
+int rescheck = 0;
+
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
 #endif
@@ -149,6 +151,8 @@ static void switch_res_crt(
          //printf("ERROR: couldn't switch to the required mode. Exiting!\n");
          SRobj->deinit();
 
+         printf("Got resolution: %dx%d%c@%f   %f   %f\n", srm.width, srm.height, srm.interlace, srm.refresh,  p_switch->ra_core_hz,  p_switch->ra_tmp_core_hz);
+
       }
    }else{
       // Call mode + get result values  
@@ -163,7 +167,9 @@ static void switch_res_crt(
          SRobj->deinit();
 
       }
-      //printf("Got resolution: %dx%d%c@%f\n", srm.width, srm.height, srm.interlace, srm.refresh);
+      printf("Got resolution: %dx%d%c@%f   %f   %f\n", srm.width, srm.height, srm.interlace, srm.refresh,  p_switch->ra_core_hz,  p_switch->ra_tmp_core_hz);
+      //video_monitor_set_refresh_rate(srm.refresh);
+      
       //printf("Press Any Key to switch to new mode\n");
 
 
@@ -174,6 +180,8 @@ static void switch_res_crt(
          SRobj->deinit();
 
       }
+      //printf("Got resolution: %dx%d%c@%f\n", srm.width, srm.height, srm.interlace, srm.refresh);
+      
    }
    video_monitor_set_refresh_rate(p_switch->ra_core_hz);
    //crt_switch_driver_reinit();
@@ -210,7 +218,7 @@ static void switch_res_crt(
  {
     if (sr2_active == true)
     {
-      SRobj->deinit();
+     // SRobj->deinit();
       CLOSELIB(dlp);
     }
  }
@@ -319,56 +327,62 @@ void crt_switch_res_core(
       int crt_switch_porch_adjust,
       int monitor_index, bool dynamic)
 {
-   /* ra_core_hz float passed from within
-    * video_driver_monitor_adjust_system_rates() */
-   if (width == 4)
+   if (rescheck > 9)
    {
-      width                        = 320;
-      height                       = 240;
-   }
+      /* ra_core_hz float passed from within
+      * video_driver_monitor_adjust_system_rates() */
+      if (width == 4)
+      {
+         width                        = 320;
+         height                       = 240;
+      }
 
-   p_switch->porch_adjust          = crt_switch_porch_adjust;
-   p_switch->ra_core_height        = height;
-   p_switch->ra_core_hz            = hz;
+      p_switch->porch_adjust          = crt_switch_porch_adjust;
+      p_switch->ra_core_height        = height;
+      p_switch->ra_core_hz            = hz;
 
-   if (dynamic)
-      p_switch->ra_core_width      = crt_compute_dynamic_width(p_switch, width);
-   else 
-      p_switch->ra_core_width      = width;
+      if (dynamic)
+         p_switch->ra_core_width      = crt_compute_dynamic_width(p_switch, width);
+      else 
+         p_switch->ra_core_width      = width;
 
-   p_switch->center_adjust         = crt_switch_center_adjust;
-   p_switch->index                 = monitor_index;
+      p_switch->center_adjust         = crt_switch_center_adjust;
+      p_switch->index                 = monitor_index;
 
-   if (crt_mode == 2)
-   {
-      if (hz > 53)
-         p_switch->ra_core_hz      = hz * 2;
-      if (hz <= 53)
-         p_switch->ra_core_hz      = 120.0f;
-   }
+      if (crt_mode == 2)
+      {
+         if (hz > 53)
+            p_switch->ra_core_hz      = hz * 2;
+         if (hz <= 53)
+            p_switch->ra_core_hz      = 120.0f;
+      }
 
-   /* Detect resolution change and switch */
-   if (
-         (p_switch->ra_tmp_height != p_switch->ra_core_height) ||
-         (p_switch->ra_core_width != p_switch->ra_tmp_width) || 
-         (p_switch->center_adjust != p_switch->tmp_center_adjust||
-          p_switch->porch_adjust  !=  p_switch->tmp_porch_adjust )
-      )
-      crt_screen_setup_aspect(
-            p_switch,
-            p_switch->ra_core_width,
-            p_switch->ra_core_height);
+      /* Detect resolution change and switch */
+      if (
+            (p_switch->ra_tmp_height != p_switch->ra_core_height) ||
+            (p_switch->ra_core_width != p_switch->ra_tmp_width) || 
+            (p_switch->center_adjust != p_switch->tmp_center_adjust||
+            p_switch->porch_adjust  !=  p_switch->tmp_porch_adjust )
+         )
+         crt_screen_setup_aspect(
+               p_switch,
+               p_switch->ra_core_width,
+               p_switch->ra_core_height);
 
-   p_switch->ra_tmp_height     = p_switch->ra_core_height;
-   p_switch->ra_tmp_width      = p_switch->ra_core_width;
-   p_switch->tmp_center_adjust = p_switch->center_adjust;
-   p_switch->tmp_porch_adjust =  p_switch->porch_adjust;
+      p_switch->ra_tmp_height     = p_switch->ra_core_height;
+      p_switch->ra_tmp_width      = p_switch->ra_core_width;
+      p_switch->tmp_center_adjust = p_switch->center_adjust;
+      p_switch->tmp_porch_adjust =  p_switch->porch_adjust;
 
-   /* Check if aspect is correct, if not change */
-   if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
-   {
-      video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
-      video_driver_apply_state_changes();
+      /* Check if aspect is correct, if not change */
+      if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
+      {
+         video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
+         video_driver_apply_state_changes();
+      }
+      rescheck = 0;
+   }else{
+      rescheck++;
    }
 }
 
