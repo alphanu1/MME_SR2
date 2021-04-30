@@ -25,11 +25,11 @@
 #include "video_crt_switch.h"
 #include "video_display_server.h"
 
-//#ifdef __linux__
+#ifdef __linux__
 #define LIBSWR "libswitchres.so"
-//#elif _WIN32
-//#define LIBSWR "libswitchres.dll"
-//#endif
+#elif _WIN32
+#define LIBSWR "libswitchres.dll"
+#endif
 
 #include <switchres/switchres_wrapper.h>
 
