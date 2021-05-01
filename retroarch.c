@@ -29540,7 +29540,10 @@ void video_display_server_destroy(void)
 
    if (current_display_server)
       if (p_rarch->current_display_server_data)
+      {
          current_display_server->destroy(p_rarch->current_display_server_data);
+      }
+
 }
 
 bool video_display_server_set_window_opacity(unsigned opacity)
@@ -33361,6 +33364,14 @@ static void retroarch_deinit_drivers(
    cbs->state_cb                                    = NULL;
 
    p_rarch->current_core.inited                     = false;
+
+   /* Switchres deinit */
+   RARCH_LOG("Getting video info\n");
+   RARCH_LOG("About to destroy SR\n");
+   if (p_rarch->video_driver_crt_switching_active) {
+      crt_destroy_modes();
+   }
+
 }
 
 bool driver_ctl(enum driver_ctl_state state, void *data)

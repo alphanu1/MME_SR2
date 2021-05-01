@@ -59,6 +59,8 @@ void crt_switch_res_core(
       int monitor_index,
       bool dynamic);
 
+void crt_destroy_modes(void);
+
 RETRO_END_DECLS
 
 #endif
