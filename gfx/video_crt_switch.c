@@ -30,14 +30,14 @@
 #elif _WIN32
 #define LIBSWR "libswitchres.dll"
 #endif
-/*
+
 #include <switchres/switchres_wrapper.h>
 
 
 LIBTYPE dlp;
 srAPI* SRobj;
 sr_mode srm;
-*/
+
 static int rescheck = 0;
 static bool sr2_active = false;
 
@@ -107,10 +107,10 @@ static void switch_res_crt(
    if (sr2_active == false)
    {
      // Load the lib
-      p_switch->dlp = OPENLIB(LIBSWR);
+      dlp = OPENLIB(LIBSWR);
 
       /* Loading failed, inform and exit */
-      if (!p_switch->dlp) {
+      if (!dlp) {
          //printf("Loading %s failed.\n", LIBSWR);
          //printf("Error: %s\n", LIBERROR());
          
@@ -118,55 +118,55 @@ static void switch_res_crt(
       
       // Load the init()
       LIBERROR();
-      p_switch->SRobj =  (srAPI*)LIBFUNC(p_switch->dlp, "srlib");
+      SRobj =  (srAPI*)LIBFUNC(dlp, "srlib");
       sr2_active = true;
 
       if ((err_msg = LIBERROR()) != NULL) 
       {
-         CLOSELIB(p_switch->dlp);  
+         CLOSELIB(dlp);  
          sr2_active = false;
       }
    
-      p_switch->SRobj->init();
-      p_switch->SRobj->sr_init_disp();
+      SRobj->init();
+      SRobj->sr_init_disp();
 
 
-      ret =  p_switch->SRobj->sr_add_mode(w, h, rr, interlace, &p_switch->srm);
+      ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
       if(!ret) 
       {
-         p_switch->SRobj->deinit();
+         SRobj->deinit();
       }
 
-      ret =   p_switch->SRobj->sr_switch_to_mode(p_switch->srm.width, p_switch->srm.height, rr, p_switch->srm.interlace, &p_switch->srm);
+      ret =   SRobj->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
       if(!ret) 
       {
-         p_switch->SRobj->deinit();
+         SRobj->deinit();
       }
    }else{
 
-      ret =  p_switch->SRobj->sr_add_mode(w, h, rr, interlace, &p_switch->srm);
+      ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
       if(!ret) 
       {
-         p_switch->SRobj->deinit();
+         SRobj->deinit();
       }
 
-      ret =   p_switch->SRobj->sr_switch_to_mode(p_switch->srm.width, p_switch->srm.height, rr, p_switch->srm.interlace, &p_switch->srm);
+      ret =   SRobj->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
       if(!ret) 
       {
-         p_switch->SRobj->deinit();
+         SRobj->deinit();
       }
    }
-   video_monitor_set_refresh_rate(p_switch->srm.refresh);
+   video_monitor_set_refresh_rate(srm.refresh);
 }
 
 void crt_destroy_modes(videocrt_switch_t *p_switch)
 {
    if (sr2_active == true)
    {
-      if (p_switch->SRobj)
+      if (SRobj)
       {   
-         p_switch->SRobj->deinit();
-         CLOSELIB(p_switch->dlp);
+         SRobj->deinit();
+         CLOSELIB(dlp);
       }
    }
 }

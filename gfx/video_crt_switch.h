@@ -24,7 +24,7 @@
 
 #include <boolean.h>
 #include <retro_common_api.h>
-#include <switchres/switchres_wrapper.h>
+
 
 RETRO_BEGIN_DECLS
 
@@ -46,9 +46,7 @@ typedef struct videocrt_switch
    float ra_core_hz;
    float ra_tmp_core_hz;
    float fly_aspect;
-   LIBTYPE dlp;
-   srAPI* SRobj;
-   sr_mode srm;
+
 
 } videocrt_switch_t;
 
