@@ -31808,6 +31808,11 @@ static void video_driver_frame(const void *data, unsigned width,
             break;
       }
 
+      if (video_info.crt_switch_resolution_super > 1)
+         width                                         =
+               video_info.crt_switch_resolution_super;
+
+
       crt_switch_res_core(
             &p_rarch->crt_switch_st,
             width,
