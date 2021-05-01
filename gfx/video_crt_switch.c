@@ -34,9 +34,9 @@
 #include <switchres/switchres_wrapper.h>
 
 
-LIBTYPE dlp;
-srAPI* SRobj;
-sr_mode srm;
+static LIBTYPE dlp;
+static srAPI* SRobj;
+static sr_mode srm;
 
 static int rescheck = 0;
 static bool sr2_active = false;
