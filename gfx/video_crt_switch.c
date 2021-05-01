@@ -30,15 +30,16 @@
 #elif _WIN32
 #define LIBSWR "libswitchres.dll"
 #endif
-
+/*
 #include <switchres/switchres_wrapper.h>
 
-bool sr2_active = false;
+
 LIBTYPE dlp;
 srAPI* SRobj;
 sr_mode srm;
-
-int rescheck = 0;
+*/
+static int rescheck = 0;
+static bool sr2_active = false;
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -106,10 +107,10 @@ static void switch_res_crt(
    if (sr2_active == false)
    {
      // Load the lib
-      dlp = OPENLIB(LIBSWR);
+      p_switch->dlp = OPENLIB(LIBSWR);
 
-      // Loading failed, inform and exit
-      if (!dlp) {
+      /* Loading failed, inform and exit */
+      if (!p_switch->dlp) {
          //printf("Loading %s failed.\n", LIBSWR);
          //printf("Error: %s\n", LIBERROR());
          
@@ -117,185 +118,57 @@ static void switch_res_crt(
       
       // Load the init()
       LIBERROR();
-      SRobj =  (srAPI*)LIBFUNC(dlp, "srlib");
+      p_switch->SRobj =  (srAPI*)LIBFUNC(p_switch->dlp, "srlib");
       sr2_active = true;
 
-      if ((err_msg = LIBERROR()) != NULL) {
-            //printf("Failed to load srAPI: %s\n", err_msg);
-            CLOSELIB(dlp);
-      
-            sr2_active = false;
+      if ((err_msg = LIBERROR()) != NULL) 
+      {
+         CLOSELIB(p_switch->dlp);  
+         sr2_active = false;
       }
    
-            // Testing the function
-         //printf("Init a new switchres_manager object:\n");
-      SRobj->init();
-      SRobj->sr_init_disp();
-      //printf("Orignial resolution expected: %dx%d@%f-%d\n", w, h, rr, interlace);
+      p_switch->SRobj->init();
+      p_switch->SRobj->sr_init_disp();
 
-      ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
+
+      ret =  p_switch->SRobj->sr_add_mode(w, h, rr, interlace, &p_switch->srm);
       if(!ret) 
       {
-         //printf("ERROR: couldn't add the required mode. Exiting!\n");
-         SRobj->deinit();
-
+         p_switch->SRobj->deinit();
       }
-      //printf("Got resolution: %dx%d%c@%f\n", srm.width, srm.height, srm.interlace, srm.refresh);
-      //printf("Press Any Key to switch to new mode\n");
 
-
-      ret =   SRobj->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
+      ret =   p_switch->SRobj->sr_switch_to_mode(p_switch->srm.width, p_switch->srm.height, rr, p_switch->srm.interlace, &p_switch->srm);
       if(!ret) 
       {
-         //printf("ERROR: couldn't switch to the required mode. Exiting!\n");
-         SRobj->deinit();
-
-         //printf("Got resolution: %dx%d%c@%f   %f   %f\n", srm.width, srm.height, srm.interlace, srm.refresh,  p_switch->ra_core_hz,  p_switch->ra_tmp_core_hz);
-
+         p_switch->SRobj->deinit();
       }
    }else{
-      // Call mode + get result values  
 
-
-      //printf("Orignial resolution expected: %dx%d@%f-%d\n", w, h, rr, interlace);
-
-      ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
+      ret =  p_switch->SRobj->sr_add_mode(w, h, rr, interlace, &p_switch->srm);
       if(!ret) 
       {
-         //printf("ERROR: couldn't add the required mode. Exiting!\n");
-         SRobj->deinit();
-
+         p_switch->SRobj->deinit();
       }
-      //printf("Got resolution: %dx%d%c@%f   %f   %f\n", srm.width, srm.height, srm.interlace, srm.refresh,  p_switch->ra_core_hz,  p_switch->ra_tmp_core_hz);
-      //video_monitor_set_refresh_rate(srm.refresh);
-      
-      //printf("Press Any Key to switch to new mode\n");
 
-      ret =   SRobj->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
+      ret =   p_switch->SRobj->sr_switch_to_mode(p_switch->srm.width, p_switch->srm.height, rr, p_switch->srm.interlace, &p_switch->srm);
       if(!ret) 
       {
-         //printf("ERROR: couldn't switch to the required mode. Exiting!\n");
-         SRobj->deinit();
-
+         p_switch->SRobj->deinit();
       }
-      //printf("Got resolution: %dx%d%c@%f\n", srm.width, srm.height, srm.interlace, srm.refresh);
-      
    }
-   video_monitor_set_refresh_rate(srm.refresh);
-   //crt_switch_driver_reinit();
-   //srnum++;
-   //CLOSELIB(dlp);
-
-   
-
-   /*
-   video_display_server_set_resolution(width, height,
-         p_switch->ra_set_core_hz,
-         p_switch->ra_core_hz,
-         p_switch->center_adjust,
-         p_switch->index,
-         p_switch->center_adjust,
-         p_switch->porch_adjust);
-
-#if defined(HAVE_VIDEOCORE)
-   crt_rpi_switch(width, height,
-         p_switch->ra_core_hz,
-         p_switch->center_adjust);
-   video_monitor_set_refresh_rate(p_switch->ra_core_hz);
-   crt_switch_driver_reinit();
-#endif
-   video_driver_apply_state_changes();
-
-*/
+   video_monitor_set_refresh_rate(p_switch->srm.refresh);
 }
 
-/* Create correct aspect to fit video 
- * if resolution does not exist */
-
- void crt_destroy_modes(void)
- {
-    if (sr2_active == true)
-    {
-       if (SRobj)
-      {   
-         SRobj->deinit();
-         CLOSELIB(dlp);
-      }
-    }
- }
-
-static void crt_screen_setup_aspect(
-      videocrt_switch_t *p_switch,
-      unsigned width, unsigned height)
+void crt_destroy_modes(videocrt_switch_t *p_switch)
 {
-#if defined(HAVE_VIDEOCORE)
-   if (height > 300)
-      height = height/2;
-#endif
-
-   if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
-      switch_crt_hz(p_switch);
-
-   /* Get original resolution of core */
-   /*
-   if (height == 4)
+   if (sr2_active == true)
    {
-     
-      if (width < 700)
-         width = 320;
-
-      height = 240;
-
-      crt_aspect_ratio_switch(p_switch, width, height);
+      if (p_switch->SRobj)
+      {   
+         p_switch->SRobj->deinit();
+         CLOSELIB(p_switch->dlp);
+      }
    }
-
-   if (height < 200 && height != 144)
-   {
-      crt_aspect_ratio_switch(p_switch, width, height);
-      height = 200;
-   }
-
-   if (height > 200)
-      crt_aspect_ratio_switch(p_switch, width, height);
-
-   if (height == 144 && p_switch->ra_set_core_hz == 50)
-   {
-      height = 288;
-      crt_aspect_ratio_switch(p_switch, width, height);
-   }
-
-   if (height > 200 && height < 224)
-   {
-      crt_aspect_ratio_switch(p_switch, width, height);
-      height = 224;
-   }
-
-   if (height > 224 && height < 240)
-   {
-      crt_aspect_ratio_switch(p_switch, width, height);
-      height = 240;
-   }
-
-   if (height > 240 && height < 255)
-   {
-      crt_aspect_ratio_switch(p_switch, width, height);
-      height = 254;
-   }
-
-   if (height == 528 && p_switch->ra_set_core_hz == 60)
-   {
-      crt_aspect_ratio_switch(p_switch, width, height);
-      height = 480;
-   }
-
-   if (height >= 240 && height < 255 && p_switch->ra_set_core_hz == 55)
-   {
-      crt_aspect_ratio_switch(p_switch, width, height);
-      height = 254;
-   }
-   */
-   crt_aspect_ratio_switch(p_switch, width, height);
-   switch_res_crt(p_switch, width, height);
 }
 
 static int crt_compute_dynamic_width(
@@ -333,11 +206,7 @@ void crt_switch_res_core(
    if (rescheck > 3)
    {
 
-      /* ra_core_hz float passed from within
-      * video_driver_monitor_adjust_system_rates() */
-
-     // printf("Orignial res expected CRT_Core: %dx%d\n", width, height);
-
+      /* ra_core_hz float passed from within */
       if (width != 4)
       {
          p_switch->porch_adjust          = crt_switch_porch_adjust;
@@ -359,7 +228,7 @@ void crt_switch_res_core(
             if (hz <= 53)
                p_switch->ra_core_hz      = 120.0f;
          }
-
+         
          /* Detect resolution change and switch */
          if (
                (p_switch->ra_tmp_height != p_switch->ra_core_height) ||
@@ -367,11 +236,19 @@ void crt_switch_res_core(
                (p_switch->center_adjust != p_switch->tmp_center_adjust||
                p_switch->porch_adjust  !=  p_switch->tmp_porch_adjust )
             )
-            crt_screen_setup_aspect(
-                  p_switch,
-                  p_switch->ra_core_width,
-                  p_switch->ra_core_height);
+         {
+            #if defined(HAVE_VIDEOCORE)
+            if (height > 300)
+               height = height/2;
+            #endif
 
+            if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
+               switch_crt_hz(p_switch);
+
+            crt_aspect_ratio_switch(p_switch, width, height);
+            switch_res_crt(p_switch, width, height);
+
+         }
          p_switch->ra_tmp_height     = p_switch->ra_core_height;
          p_switch->ra_tmp_width      = p_switch->ra_core_width;
          p_switch->tmp_center_adjust = p_switch->center_adjust;
@@ -390,7 +267,7 @@ void crt_switch_res_core(
       
    }
 }
-
+/* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
 static void crt_rpi_switch(int width, int height, float hz, int xoffset)
 {

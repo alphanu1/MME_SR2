@@ -24,6 +24,7 @@
 
 #include <boolean.h>
 #include <retro_common_api.h>
+#include <switchres/switchres_wrapper.h>
 
 RETRO_BEGIN_DECLS
 
@@ -45,6 +46,9 @@ typedef struct videocrt_switch
    float ra_core_hz;
    float ra_tmp_core_hz;
    float fly_aspect;
+   LIBTYPE dlp;
+   srAPI* SRobj;
+   sr_mode srm;
 
 } videocrt_switch_t;
 
@@ -59,7 +63,7 @@ void crt_switch_res_core(
       int monitor_index,
       bool dynamic);
 
-void crt_destroy_modes(void);
+void crt_destroy_modes(videocrt_switch_t *p_switch);
 
 RETRO_END_DECLS
 

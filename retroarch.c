@@ -33369,7 +33369,7 @@ static void retroarch_deinit_drivers(
    RARCH_LOG("Getting video info\n");
    RARCH_LOG("About to destroy SR\n");
    if (p_rarch->video_driver_crt_switching_active) {
-      crt_destroy_modes();
+      crt_destroy_modes(&p_rarch->crt_switch_st);
    }
 
 }
