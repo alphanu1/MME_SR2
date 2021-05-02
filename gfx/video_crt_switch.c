@@ -247,14 +247,15 @@ void crt_switch_res_core(
             if (height > 300)
                height = height/2;
             #endif
-
+            crt_aspect_ratio_switch(p_switch, width, height);
+            switch_res_crt(p_switch, width, height);
+            
             if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
             {
                switch_crt_hz(p_switch);
                crt_switch_driver_reinit();
             }
-            crt_aspect_ratio_switch(p_switch, width, height);
-            switch_res_crt(p_switch, width, height);
+            
             video_driver_apply_state_changes();
 
          }
