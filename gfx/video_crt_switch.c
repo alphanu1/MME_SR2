@@ -207,7 +207,7 @@ void crt_switch_res_core(
    {
 
       /* ra_core_hz float passed from within */
-      if (width == 4 )
+    /*  if (width == 4 )
       {
          width = 640;
       }
@@ -215,7 +215,11 @@ void crt_switch_res_core(
       {
          height = 480;
       }
-         p_switch->porch_adjust          = crt_switch_porch_adjust;
+      */
+      
+      if (height != 4 )
+      {
+		 p_switch->porch_adjust          = crt_switch_porch_adjust;
          p_switch->ra_core_height        = height;
          p_switch->ra_core_hz            = hz;
 
@@ -271,7 +275,7 @@ void crt_switch_res_core(
             video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
             video_driver_apply_state_changes();
          }
-      
+      }
       rescheck = 0;
    }else{
       rescheck++;
