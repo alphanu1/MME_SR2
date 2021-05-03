@@ -97,7 +97,7 @@ static void crt_handheld_fix(videocrt_switch_t *p_switch)
    {
       p_switch->ra_core_height= 288;
       crt_aspect_ratio_switch(p_switch, p_switch->ra_core_width , p_switch->ra_core_height );
-   }else if (p_switch->ra_core_height < 200 )
+   }else if (p_switch->ra_core_height < 170 )
    {
       p_switch->ra_core_height= 200;
       if (p_switch->ra_core_width > 1000)
