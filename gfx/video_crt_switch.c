@@ -85,8 +85,9 @@ static void crt_aspect_ratio_switch(
       unsigned width, unsigned height)
 {
    /* send aspect float to video_driver */
-   p_switch->fly_aspect = (float)width / height;
+   p_switch->fly_aspect = (float)width / (float)height;
    video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
+   //printf("Aspect ratio: %f failed.\n", p_switch->fly_aspect );
 }
 
 static void crt_handheld_fix(videocrt_switch_t *p_switch)
@@ -99,7 +100,11 @@ static void crt_handheld_fix(videocrt_switch_t *p_switch)
    }else if (p_switch->ra_core_height < 200 )
    {
       p_switch->ra_core_height= 200;
+      if (p_switch->ra_core_width > 1000)
+         crt_aspect_ratio_switch(p_switch, p_switch->ra_core_width , p_switch->ra_core_height );
    }
+
+
 }
 
 static void switch_res_crt(
