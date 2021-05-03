@@ -91,14 +91,14 @@ static void crt_aspect_ratio_switch(
 
 static void switch_res_crt(
       videocrt_switch_t *p_switch,
-      unsigned width, unsigned height)
+      unsigned width, unsigned height, unsigned crt_mode)
 {
    unsigned char interlace = 0,   ret;
    const char* err_msg;
 
    int w = width, h = height;
    double rr = p_switch->ra_core_hz;
-   if (height >= 300)
+   if (height >= 300 && crt_mode == 1)
       interlace = 1;
    else
       interlace = 0;
@@ -203,8 +203,7 @@ void crt_switch_res_core(
       int crt_switch_porch_adjust,
       int monitor_index, bool dynamic)
 {
-   if (rescheck > 3)
-   {
+
 
       /* ra_core_hz float passed from within */
     /*  if (width == 4 )
@@ -252,7 +251,7 @@ void crt_switch_res_core(
                height = height/2;
             #endif
             crt_aspect_ratio_switch(p_switch, width, height);
-            switch_res_crt(p_switch, width, height);
+            switch_res_crt(p_switch, width, height, crt_mode);
             
             if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
             {
@@ -275,7 +274,7 @@ void crt_switch_res_core(
             video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
             video_driver_apply_state_changes();
          }
-      }
+
       rescheck = 0;
    }else{
       rescheck++;
