@@ -91,6 +91,7 @@ static void crt_aspect_ratio_switch(
 
 static void crt_handheld_fix(videocrt_switch_t *p_switch)
 {
+   crt_aspect_ratio_switch(p_switch, p_switch->ra_core_width , p_switch->ra_core_height );
    if (p_switch->ra_core_height == 144 && p_switch->ra_set_core_hz == 50)
    {
       p_switch->ra_core_height= 288;
@@ -249,8 +250,8 @@ void crt_switch_res_core(
             if (hz <= 53)
                p_switch->ra_core_hz      = 120.0f;
          }
-         crt_handheld_fix(p_switch);
          
+         crt_handheld_fix(p_switch);
          /* Detect resolution change and switch */
          if (
                (p_switch->ra_tmp_height != p_switch->ra_core_height) ||
@@ -263,7 +264,7 @@ void crt_switch_res_core(
             if (height > 300)
                height = height/2;
             #endif
-
+            
             crt_aspect_ratio_switch(p_switch, p_switch->ra_core_width , p_switch->ra_core_height );
             switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode);
             
