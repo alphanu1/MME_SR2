@@ -33371,7 +33371,7 @@ static void retroarch_deinit_drivers(
    p_rarch->current_core.inited                     = false;
 
    /* Switchres deinit */
-   RARCH_LOG("Getting video info\n");
+   RARCH_LOG("[CRT]: Getting video info\n");
    RARCH_LOG("[CRT]: About to destroy SR\n");
    if (p_rarch->video_driver_crt_switching_active) {
       crt_destroy_modes(&p_rarch->crt_switch_st);

@@ -188,7 +188,7 @@ void crt_destroy_modes(videocrt_switch_t *p_switch)
       {   
          SRobj->deinit();
          CLOSELIB(dlp);
-         RARCH_LOG("[CRT]: SR Destroyed");
+         RARCH_LOG("[CRT]: SR Destroyed \n");
       }
    }
 }
