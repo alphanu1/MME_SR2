@@ -145,10 +145,13 @@ static void switch_res_crt(
       {
          CLOSELIB(dlp);  
          sr2_active = false;
+         RARCH_LOG("[CRT]: Switchres Library failed to load \n");
       }
    
       SRobj->init();
+      RARCH_LOG("[CRT]: SR init \n");
       SRobj->sr_init_disp();
+      RARCH_LOG("[CRT]: SR init_disp \n");
 
 
       ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
@@ -176,7 +179,7 @@ static void switch_res_crt(
          SRobj->deinit();
       }
    }
-   RARCH_LOG("[CRT]: Reolution Set: %dx%d@%f \n", srm.width, srm.height, srm.refresh);
+   RARCH_LOG("[CRT]: Resolution Set: %dx%d@%f \n", srm.width, srm.height, srm.refresh);
    video_monitor_set_refresh_rate(srm.refresh);
 }
 
@@ -296,7 +299,7 @@ void crt_switch_res_core(
          /* Check if aspect is correct, if not change */
          if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
          {
-            RARCH_LOG("[CRT]: Setting Aspect Ratio: %f /n", (float)p_switch->fly_aspect);
+            RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
             video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
             video_driver_apply_state_changes();
          }
