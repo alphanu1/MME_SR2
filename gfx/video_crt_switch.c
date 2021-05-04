@@ -22,8 +22,10 @@
 #include <stdio.h>
 
 #include "../retroarch.h"
+#include <retro_common_api.h>
 #include "video_crt_switch.h"
 #include "video_display_server.h"
+#include "../core_info.h"
 
 #ifdef __linux__
 #define LIBSWR "libswitchres.so"
@@ -174,6 +176,7 @@ static void switch_res_crt(
          SRobj->deinit();
       }
    }
+   RARCH_LOG("[CRT]: Reolution Set: %dx%d@%f \n", srm.width, srm.height, srm.refresh);
    video_monitor_set_refresh_rate(srm.refresh);
 }
 
@@ -185,6 +188,7 @@ void crt_destroy_modes(videocrt_switch_t *p_switch)
       {   
          SRobj->deinit();
          CLOSELIB(dlp);
+         RARCH_LOG("[CRT]: SR Destroyed");
       }
    }
 }
@@ -210,6 +214,7 @@ static int crt_compute_dynamic_width(
             > p_switch->p_clock)
          break;
    }
+   RARCH_LOG("[CRT]: Dynamic Width Set to: %d \n", dynamic_width );
    return dynamic_width;
 }
 
@@ -221,7 +226,7 @@ void crt_switch_res_core(
       int crt_switch_porch_adjust,
       int monitor_index, bool dynamic)
 {
-
+   
 
       /* ra_core_hz float passed from within */
     /*  if (width == 4 )
@@ -269,7 +274,7 @@ void crt_switch_res_core(
             if (height > 300)
                height = height/2;
             #endif
-            
+            RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", width, height, hz);
             crt_aspect_ratio_switch(p_switch, p_switch->ra_core_width , p_switch->ra_core_height );
             switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode);
             
@@ -291,6 +296,7 @@ void crt_switch_res_core(
          /* Check if aspect is correct, if not change */
          if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
          {
+            RARCH_LOG("[CRT]: Setting Aspect Ratio: %f /n", (float)p_switch->fly_aspect);
             video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
             video_driver_apply_state_changes();
          }
