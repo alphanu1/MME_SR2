@@ -195,7 +195,16 @@ static void switch_res_crt(
       RARCH_LOG("[CRT]: Resolution Set: %dx%di@%f \n", srm.width, srm.height, srm.refresh);
 
    video_monitor_set_refresh_rate(srm.refresh);
-   crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
+
+   if (srm.width > width)
+   {
+      int aw = srm.width/width;
+      int bw = width*aw;
+      printf("Error: %f\n", (float)bw/(float)srm.height);
+      crt_aspect_ratio_switch(p_switch, bw , srm.height);
+
+   }else
+      crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
 }
 
 void crt_destroy_modes(videocrt_switch_t *p_switch)
