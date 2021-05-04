@@ -31421,6 +31421,7 @@ static void video_driver_frame(const void *data, unsigned width,
 #if defined(HAVE_GFX_WIDGETS)
    bool widgets_active          = p_rarch->widgets_active;
 #endif
+   static int native_width = 0;
 
    status_text[0]                  = '\0';
    video_driver_msg[0]          = '\0';
@@ -31790,7 +31791,7 @@ static void video_driver_frame(const void *data, unsigned width,
    if (video_info.crt_switch_resolution)
    {
       p_rarch->video_driver_crt_switching_active          = true;
-
+      native_width = width;
       switch (video_info.crt_switch_resolution_super)
       {
          case 2560:
@@ -31815,7 +31816,7 @@ static void video_driver_frame(const void *data, unsigned width,
 
       crt_switch_res_core(
             &p_rarch->crt_switch_st,
-            width,
+            native_width, width,
             height,
             p_rarch->video_driver_core_hz,
             video_info.crt_switch_resolution,

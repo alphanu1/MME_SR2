@@ -52,6 +52,7 @@ typedef struct videocrt_switch
 
 void crt_switch_res_core(
       videocrt_switch_t *p_switch,
+      unsigned naitive_width,
       unsigned width,
       unsigned height,
       float hz,

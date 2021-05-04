@@ -42,6 +42,7 @@ static sr_mode srm;
 
 static int rescheck = 0;
 static bool sr2_active = false;
+static int super_width                    = 0;
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -89,7 +90,7 @@ static void crt_aspect_ratio_switch(
    /* send aspect float to video_driver */
    p_switch->fly_aspect = (float)width / (float)height;
    video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
-   //printf("Aspect ratio: %f failed.\n", p_switch->fly_aspect );
+   RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
 }
 
 static void crt_handheld_fix(videocrt_switch_t *p_switch)
@@ -111,12 +112,18 @@ static void crt_handheld_fix(videocrt_switch_t *p_switch)
 
 static void switch_res_crt(
       videocrt_switch_t *p_switch,
-      unsigned width, unsigned height, unsigned crt_mode)
+      unsigned width, unsigned height, unsigned crt_mode, unsigned native_width)
 {
    unsigned char interlace = 0,   ret;
    const char* err_msg;
 
-   int w = width, h = height;
+   #ifdef __linux__
+      int w = native_width, h = height;
+      super_width = w;
+   #elif _WIN32
+      int w = native_width, h = height;
+      super_width = w;
+   #endif
    double rr = p_switch->ra_core_hz;
    if (height >= 300 && crt_mode == 1)
       interlace = 1;
@@ -152,35 +159,43 @@ static void switch_res_crt(
       RARCH_LOG("[CRT]: SR init \n");
       SRobj->sr_init_disp();
       RARCH_LOG("[CRT]: SR init_disp \n");
-
-
+/*
+      #ifdef __linux__
       ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
       if(!ret) 
       {
          SRobj->deinit();
       }
-
-      ret =   SRobj->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
+      #endif
+      */
+      ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
       if(!ret) 
       {
          SRobj->deinit();
       }
    }else{
-
+      /*
+      #ifdef __linux__
       ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
       if(!ret) 
       {
          SRobj->deinit();
       }
-
-      ret =   SRobj->sr_switch_to_mode(srm.width, srm.height, rr, srm.interlace, &srm);
+      #endif
+      */
+      ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
       if(!ret) 
       {
          SRobj->deinit();
       }
    }
-   RARCH_LOG("[CRT]: Resolution Set: %dx%d@%f \n", srm.width, srm.height, srm.refresh);
+   if (srm.interlace == 0)
+      RARCH_LOG("[CRT]: Resolution Set: %dx%d@%f \n", srm.width, srm.height, srm.refresh);
+   else
+      RARCH_LOG("[CRT]: Resolution Set: %dx%di@%f \n", srm.width, srm.height, srm.refresh);
+
    video_monitor_set_refresh_rate(srm.refresh);
+   crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
 }
 
 void crt_destroy_modes(videocrt_switch_t *p_switch)
@@ -223,14 +238,12 @@ static int crt_compute_dynamic_width(
 
 void crt_switch_res_core(
       videocrt_switch_t *p_switch,
-      unsigned width, unsigned height,
+      unsigned native_width, unsigned width, unsigned height,
       float hz, unsigned crt_mode,
       int crt_switch_center_adjust,
       int crt_switch_porch_adjust,
       int monitor_index, bool dynamic)
 {
-   
-
       /* ra_core_hz float passed from within */
     /*  if (width == 4 )
       {
@@ -264,13 +277,13 @@ void crt_switch_res_core(
                p_switch->ra_core_hz      = 120.0f;
          }
          
-         crt_handheld_fix(p_switch);
+         //crt_handheld_fix(p_switch);
          /* Detect resolution change and switch */
          if (
                (p_switch->ra_tmp_height != p_switch->ra_core_height) ||
                (p_switch->ra_core_width != p_switch->ra_tmp_width) || 
                (p_switch->center_adjust != p_switch->tmp_center_adjust||
-               p_switch->porch_adjust  !=  p_switch->tmp_porch_adjust )
+                p_switch->porch_adjust  !=  p_switch->tmp_porch_adjust )
             )
          {
             #if defined(HAVE_VIDEOCORE)
@@ -278,9 +291,8 @@ void crt_switch_res_core(
                height = height/2;
             #endif
             RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", width, height, hz);
-            crt_aspect_ratio_switch(p_switch, p_switch->ra_core_width , p_switch->ra_core_height );
-            switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode);
             
+            switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width);
             if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
             {
                switch_crt_hz(p_switch);
