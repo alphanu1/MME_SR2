@@ -208,6 +208,10 @@ static void switch_res_crt(
    }else
       crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
 
+   #ifdef __WIN32__
+      crt_switch_driver_reinit();
+   #endif
+
 }
 
 void crt_destroy_modes(videocrt_switch_t *p_switch)
@@ -308,7 +312,9 @@ void crt_switch_res_core(
             if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
             {
                switch_crt_hz(p_switch);
-               crt_switch_driver_reinit();
+               #ifdef __linux__
+                  crt_switch_driver_reinit();
+               #endif
             }
             
             video_driver_apply_state_changes();
