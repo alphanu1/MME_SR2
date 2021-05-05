@@ -206,6 +206,7 @@ static void switch_res_crt(
 
    }else
       crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
+
 }
 
 void crt_destroy_modes(videocrt_switch_t *p_switch)
@@ -278,7 +279,7 @@ void crt_switch_res_core(
 
          p_switch->center_adjust         = crt_switch_center_adjust;
          p_switch->index                 = monitor_index;
-
+/*
          if (crt_mode == 2)
          {
             if (hz > 53)
@@ -286,7 +287,7 @@ void crt_switch_res_core(
             if (hz <= 53)
                p_switch->ra_core_hz      = 120.0f;
          }
-         
+ */        
          //crt_handheld_fix(p_switch);
          /* Detect resolution change and switch */
          if (
