@@ -200,7 +200,6 @@ static void switch_res_crt(
    {
       int aw = srm.width/width;
       int bw = width*aw;
-      printf("Error: %f\n", (float)bw/(float)srm.height);
       crt_aspect_ratio_switch(p_switch, bw , srm.height);
 
    }else
