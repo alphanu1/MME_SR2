@@ -126,11 +126,11 @@ static void switch_res_crt(
       super_width = w;
    #endif
    double rr = p_switch->ra_core_hz;
-   if (height >= 300 && crt_mode == 1)
+  /* if (height >= 300 && crt_mode == 1)
       interlace = 1;
    else
       interlace = 0;
-
+   */
    //printf("About to open %s.\n", LIBSWR);
    if (sr2_active == false)
    {
@@ -311,12 +311,10 @@ void crt_switch_res_core(
             
             video_driver_apply_state_changes();
 
-         
-        
             p_switch->ra_tmp_height     = p_switch->ra_core_height;
             p_switch->ra_tmp_width      = p_switch->ra_core_width;
             p_switch->tmp_center_adjust = p_switch->center_adjust;
-            p_switch->tmp_porch_adjust =  p_switch->porch_adjust;
+            p_switch->tmp_porch_adjust  = p_switch->porch_adjust;
          }
          /* Check if aspect is correct, if not change */
          if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
