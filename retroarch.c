@@ -31827,7 +31827,8 @@ static void video_driver_frame(const void *data, unsigned width,
    }
    else if (!video_info.crt_switch_resolution)
       p_rarch->video_driver_crt_switching_active = false;
-}
+
+ }
 
 void crt_switch_driver_reinit(void)
 {
@@ -32932,7 +32933,7 @@ static void driver_adjust_system_rates(
 
       if (p_rarch->video_driver_crt_switching_active)
          timing_skew_hz             = input_fps;
-      p_rarch->video_driver_core_hz = input_fps;
+      p_rarch->video_driver_core_hz = input_fps; 
 
       if (!video_driver_monitor_adjust_system_rates(
          timing_skew_hz,

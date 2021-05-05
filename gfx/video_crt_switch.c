@@ -26,6 +26,7 @@
 #include "video_crt_switch.h"
 #include "video_display_server.h"
 #include "../core_info.h"
+#include "../verbosity.h"
 
 #ifdef __linux__
 #define LIBSWR "libswitchres.so"
@@ -93,7 +94,7 @@ static void crt_aspect_ratio_switch(
    video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
    RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
 }
-
+/*
 static void crt_handheld_fix(videocrt_switch_t *p_switch)
 {
    crt_aspect_ratio_switch(p_switch, p_switch->ra_core_width , p_switch->ra_core_height );
@@ -110,7 +111,7 @@ static void crt_handheld_fix(videocrt_switch_t *p_switch)
 
 
 }
-
+*/
 static void switch_res_crt(
       videocrt_switch_t *p_switch,
       unsigned width, unsigned height, unsigned crt_mode, unsigned native_width)
@@ -290,7 +291,7 @@ void crt_switch_res_core(
  */        
          //crt_handheld_fix(p_switch);
          /* Detect resolution change and switch */
-         if (
+         if ( 
                (p_switch->ra_tmp_height != p_switch->ra_core_height) ||
                (p_switch->ra_core_width != p_switch->ra_tmp_width) || 
                (p_switch->center_adjust != p_switch->tmp_center_adjust||
