@@ -55,9 +55,10 @@ static void crt_rpi_switch(int width, int height, float hz, int xoffset);
 
 static void switch_crt_hz(videocrt_switch_t *p_switch)
 {
-   float ra_core_hz = p_switch->ra_core_hz;
+ 
 
    /* set hz float to an int for windows switching */
+   /*
    if (ra_core_hz < 100)
    {
       if (ra_core_hz < 53)
@@ -77,10 +78,10 @@ static void switch_crt_hz(videocrt_switch_t *p_switch)
       if (ra_core_hz >= 114)
          p_switch->ra_set_core_hz = 120;
    }
+   */
+   video_monitor_set_refresh_rate(p_switch->ra_core_hz);
 
-   //video_monitor_set_refresh_rate(p_switch->ra_set_core_hz);
-
-   p_switch->ra_tmp_core_hz = ra_core_hz;
+   p_switch->ra_tmp_core_hz = p_switch->ra_core_hz;
 }
 
 static void crt_aspect_ratio_switch(
@@ -194,7 +195,8 @@ static void switch_res_crt(
    else
       RARCH_LOG("[CRT]: Resolution Set: %dx%di@%f \n", srm.width, srm.height, srm.refresh);
 
-   video_monitor_set_refresh_rate(srm.refresh);
+   //video_monitor_set_refresh_rate(srm.refresh);
+   p_switch->ra_core_hz = srm.refresh;
 
    if (srm.width > width)
    {
@@ -265,7 +267,7 @@ void crt_switch_res_core(
       
       if (height != 4 )
       {
-		 p_switch->porch_adjust          = crt_switch_porch_adjust;
+		   p_switch->porch_adjust          = crt_switch_porch_adjust;
          p_switch->ra_core_height        = height;
          p_switch->ra_core_hz            = hz;
 
@@ -309,13 +311,13 @@ void crt_switch_res_core(
             
             video_driver_apply_state_changes();
 
-         }
+         
         
-         p_switch->ra_tmp_height     = p_switch->ra_core_height;
-         p_switch->ra_tmp_width      = p_switch->ra_core_width;
-         p_switch->tmp_center_adjust = p_switch->center_adjust;
-         p_switch->tmp_porch_adjust =  p_switch->porch_adjust;
-
+            p_switch->ra_tmp_height     = p_switch->ra_core_height;
+            p_switch->ra_tmp_width      = p_switch->ra_core_width;
+            p_switch->tmp_center_adjust = p_switch->center_adjust;
+            p_switch->tmp_porch_adjust =  p_switch->porch_adjust;
+         }
          /* Check if aspect is correct, if not change */
          if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
          {
@@ -324,11 +326,8 @@ void crt_switch_res_core(
             video_driver_apply_state_changes();
          }
 
-      rescheck = 0;
-   }else{
-      rescheck++;
-      
-   }
+
+      }
 }
 /* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
