@@ -214,8 +214,10 @@ static void switch_res_crt(
 
    #ifdef __WIN32__
    if (srm.width > 900)
+   {
       crt_switch_driver_reinit();
       video_driver_apply_state_changes();
+   }
    #endif
 
    video_driver_set_size(srm.width , srm.height); 
