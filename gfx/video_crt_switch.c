@@ -210,7 +210,8 @@ static void switch_res_crt(
 
    //video_driver_set_viewport(srm.width , srm.height,0,0);
    //video_driver_set_video_mode(srm.width , srm.height,1);
-   video_driver_set_size(srm.width , srm.height);
+   //video_driver_set_size(srm.width , srm.height);
+
 
 }
 
