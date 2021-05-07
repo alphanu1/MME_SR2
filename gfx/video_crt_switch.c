@@ -209,7 +209,7 @@ static void switch_res_crt(
       crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
 
    video_driver_set_viewport(srm.width , srm.height,0,0);
-   video_driver_set_video_mode(srm.width , srm.height,1);
+   //video_driver_set_video_mode(srm.width , srm.height,1);
 
 }
 
