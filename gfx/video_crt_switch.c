@@ -211,10 +211,15 @@ static void switch_res_crt(
 
    //video_driver_set_viewport(srm.width , srm.height,0,0);
    //video_driver_set_size(srm.width , srm.height);
-   srm_curr_width = srm.width ;
-   srm_curr_height =srm.height;
 
+   #ifdef __WIN32__
+   if (srm.width > 900)
+      crt_switch_driver_reinit();
+      video_driver_apply_state_changes();
+   #endif
 
+   video_driver_set_size(srm.width , srm.height); 
+   video_driver_apply_state_changes();
 }
 
 void crt_destroy_modes(videocrt_switch_t *p_switch)
