@@ -44,8 +44,7 @@ static sr_mode srm;
 static int rescheck = 0;
 static bool sr2_active = false;
 static int super_width                    = 0;
-unsigned int srm_curr_width =0;
-unsigned int srm_curr_height =0;
+
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
 #endif
@@ -213,8 +212,9 @@ static void switch_res_crt(
    //video_driver_set_size(srm.width , srm.height);
 
    #ifdef __WIN32__
-   if (srm.width > 900)
+   if (super_width > 900)
    {
+      super_width = srm.width;
       crt_switch_driver_reinit();
       video_driver_apply_state_changes();
    }
@@ -280,7 +280,7 @@ void crt_switch_res_core(
          height = 480;
       }
       */
-      video_driver_set_size(srm_curr_width , srm_curr_height);
+      //video_driver_set_size(srm_curr_width , srm_curr_height);
       if (height != 4 )
       {
 		   p_switch->porch_adjust          = crt_switch_porch_adjust;
