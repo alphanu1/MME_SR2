@@ -44,7 +44,8 @@ static sr_mode srm;
 static int rescheck = 0;
 static bool sr2_active = false;
 static int super_width                    = 0;
-
+unsigned int srm_curr_width =0;
+unsigned int srm_curr_height =0;
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
 #endif
@@ -209,8 +210,9 @@ static void switch_res_crt(
       crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
 
    //video_driver_set_viewport(srm.width , srm.height,0,0);
-   //video_driver_set_video_mode(srm.width , srm.height,1);
    //video_driver_set_size(srm.width , srm.height);
+   srm_curr_width = srm.width ;
+   srm_curr_height =srm.height;
 
 
 }
@@ -271,7 +273,7 @@ void crt_switch_res_core(
          height = 480;
       }
       */
-      
+      video_driver_set_size(srm_curr_width , srm_curr_height);
       if (height != 4 )
       {
 		   p_switch->porch_adjust          = crt_switch_porch_adjust;
