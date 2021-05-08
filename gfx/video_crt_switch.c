@@ -156,15 +156,18 @@ static void switch_res_crt(
       LIBERROR();
       SRobj =  (srAPI*)LIBFUNC(dlp, "srlib");
       sr2_active = true;
-
+      
       if ((err_msg = LIBERROR()) != NULL) 
       {
          CLOSELIB(dlp);  
          sr2_active = false;
          RARCH_LOG("[CRT]: Switchres Library failed to load \n");
       }
-   
       SRobj->init();
+      SRobj->sr_set_log_level (3);
+      SRobj->sr_set_log_callback_info(RARCH_LOG);
+      SRobj->sr_set_log_callback_debug(RARCH_LOG);
+      SRobj->sr_set_log_callback_error(RARCH_LOG);
       RARCH_LOG("[CRT]: SR init \n");
       
       if (monitor_index+1 > 0)
