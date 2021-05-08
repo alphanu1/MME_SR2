@@ -44,6 +44,7 @@ static sr_mode srm;
 static int rescheck = 0;
 static bool sr2_active = false;
 static int super_width                    = 0;
+int rtn       =0;
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -114,11 +115,20 @@ static void crt_handheld_fix(videocrt_switch_t *p_switch)
 */
 static void switch_res_crt(
       videocrt_switch_t *p_switch,
-      unsigned width, unsigned height, unsigned crt_mode, unsigned native_width)
+      unsigned width, unsigned height, unsigned crt_mode, unsigned native_width, int monitor_index)
 {
    unsigned char interlace = 0,   ret;
    const char* err_msg;
+   char index = 0;
+   char mindex[1];
 
+   if (monitor_index < 10)
+      index = monitor_index+48;
+   else
+      index = '0';
+
+   mindex[0] = index;
+   
    #ifdef __linux__
       int w = native_width, h = height;
       super_width = w;
@@ -127,12 +137,9 @@ static void switch_res_crt(
       super_width = w;
    #endif
    double rr = p_switch->ra_core_hz;
-  /* if (height >= 300 && crt_mode == 1)
-      interlace = 1;
-   else
-      interlace = 0;
-   */
-   //printf("About to open %s.\n", LIBSWR);
+
+   RARCH_LOG("SRobj: RA Monitor Index: %s\n",mindex);
+
    if (sr2_active == false)
    {
      // Load the lib
@@ -159,69 +166,87 @@ static void switch_res_crt(
    
       SRobj->init();
       RARCH_LOG("[CRT]: SR init \n");
-      SRobj->sr_init_disp();
-      RARCH_LOG("[CRT]: SR init_disp \n");
-/*
-      #ifdef __linux__
-      ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
-      if(!ret) 
+      
+      if (monitor_index+1 > 0)
       {
-         SRobj->deinit();
+         rtn = SRobj->sr_init_disp(mindex); 
+         RARCH_LOG("[CRT]: SR Disp Monitor Index: %s  \n", mindex);
       }
-      #endif
-      */
-      ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
-      if(!ret) 
+
+      if (monitor_index == -1)
       {
+
+            rtn = SRobj->sr_init_disp(NULL);
+            RARCH_LOG("[CRT]: SR Disp Monitor Index: Auto  \n");
+      }
+
+       RARCH_LOG("[CRT]: SR rtn %d \n", rtn);
+
+      if (rtn == 1)
+      {
+      
+
+         RARCH_LOG("[CRT]: SR init_disp \n");
+
+         ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
+         if(!ret) 
+         {
+            SRobj->deinit();
+            
+         }
+         
+
+      }else {
          SRobj->deinit();
       }
    }else{
-      /*
-      #ifdef __linux__
-      ret =  SRobj->sr_add_mode(w, h, rr, interlace, &srm);
-      if(!ret) 
+
+      RARCH_LOG("[CRT]: SR rtn %d \n", rtn);
+      if (rtn ==1)
       {
-         SRobj->deinit();
-      }
-      #endif
-      */
-      ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
-      if(!ret) 
-      {
-         SRobj->deinit();
+
+         ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
+         if(!ret) 
+         {
+            SRobj->deinit();
+         }
+      
+         
+         if (srm.interlace == 0)
+            RARCH_LOG("[CRT]: Resolution Set: %dx%d@%f \n", srm.width, srm.height, srm.refresh);
+         else
+            RARCH_LOG("[CRT]: Resolution Set: %dx%di@%f \n", srm.width, srm.height, srm.refresh);
+
+         //video_monitor_set_refresh_rate(srm.refresh);
+         p_switch->ra_core_hz = srm.refresh;
+
+         if (srm.width > width)
+         {
+            int aw = srm.width/width;
+            int bw = width*aw;
+            crt_aspect_ratio_switch(p_switch, bw , srm.height);
+
+         }else
+            crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
+
+         //video_driver_set_viewport(srm.width , srm.height,0,0);
+         //video_driver_set_size(srm.width , srm.height);
+
+         #ifdef __WIN32__
+         if (super_width > 900)
+         {
+            super_width = srm.width;
+            crt_switch_driver_reinit();
+            video_driver_apply_state_changes();
+         }
+         #endif
+
+         video_driver_set_size(srm.width , srm.height); 
+         video_driver_apply_state_changes();
+
+         
       }
    }
-   if (srm.interlace == 0)
-      RARCH_LOG("[CRT]: Resolution Set: %dx%d@%f \n", srm.width, srm.height, srm.refresh);
-   else
-      RARCH_LOG("[CRT]: Resolution Set: %dx%di@%f \n", srm.width, srm.height, srm.refresh);
-
-   //video_monitor_set_refresh_rate(srm.refresh);
-   p_switch->ra_core_hz = srm.refresh;
-
-   if (srm.width > width)
-   {
-      int aw = srm.width/width;
-      int bw = width*aw;
-      crt_aspect_ratio_switch(p_switch, bw , srm.height);
-
-   }else
-      crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
-
-   //video_driver_set_viewport(srm.width , srm.height,0,0);
-   //video_driver_set_size(srm.width , srm.height);
-
-   #ifdef __WIN32__
-   if (super_width > 900)
-   {
-      super_width = srm.width;
-      crt_switch_driver_reinit();
-      video_driver_apply_state_changes();
-   }
-   #endif
-
-   video_driver_set_size(srm.width , srm.height); 
-   video_driver_apply_state_changes();
 }
 
 void crt_destroy_modes(videocrt_switch_t *p_switch)
@@ -281,6 +306,8 @@ void crt_switch_res_core(
       }
       */
       //video_driver_set_size(srm_curr_width , srm_curr_height);
+
+      
       if (height != 4 )
       {
 		   p_switch->porch_adjust          = crt_switch_porch_adjust;
@@ -318,7 +345,7 @@ void crt_switch_res_core(
             #endif
             RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", width, height, hz);
             
-            switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width);
+            switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1);
             if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
             {
                switch_crt_hz(p_switch);
