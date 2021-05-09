@@ -99,7 +99,7 @@ static void crt_aspect_ratio_switch(
 
 static void set_aspect(videocrt_switch_t *p_switch, unsigned int width, unsigned int height, unsigned int srm_width, unsigned srm_height)
 {
-   if (srm_width > 0)
+   if (srm_width > width)
    {
       if ( (srm_width > width || srm_height > height) || (srm_width < width || srm_height < height) )
       {
