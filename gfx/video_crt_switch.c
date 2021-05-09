@@ -86,6 +86,7 @@ static void switch_crt_hz(videocrt_switch_t *p_switch)
    p_switch->ra_tmp_core_hz = p_switch->ra_core_hz;
 }
 
+
 static void crt_aspect_ratio_switch(
       videocrt_switch_t *p_switch,
       unsigned width, unsigned height)
@@ -94,6 +95,24 @@ static void crt_aspect_ratio_switch(
    p_switch->fly_aspect = (float)width / (float)height;
    video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
    RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
+}
+
+static void set_aspect(videocrt_switch_t *p_switch, unsigned int width, unsigned int height, unsigned int srm_width, unsigned srm_height)
+{
+   if (srm_width > 0)
+   {
+      if ((srm_width > width || srm_height > height) || (srm_width > width || srm_height > height))
+      {
+      int aw = srm_width/width;
+      int ah = srm_height/height;
+      int bw = width*aw;
+      int bh = height*ah;
+         
+      crt_aspect_ratio_switch(p_switch, bw , bh);
+      }
+   }else{
+      crt_aspect_ratio_switch(p_switch, width , height);
+   }
 }
 /*
 static void crt_handheld_fix(videocrt_switch_t *p_switch)
@@ -201,6 +220,7 @@ static void switch_res_crt(
 
       }else {
          SRobj->deinit();
+         set_aspect(p_switch, width , height, 0,0);
       }
    }else{
 
@@ -223,14 +243,10 @@ static void switch_res_crt(
          //video_monitor_set_refresh_rate(srm.refresh);
          p_switch->ra_core_hz = srm.refresh;
 
-         if (srm.width > width)
-         {
-            int aw = srm.width/width;
-            int bw = width*aw;
-            crt_aspect_ratio_switch(p_switch, bw , srm.height);
 
-         }else
-            crt_aspect_ratio_switch(p_switch, srm.width , srm.height);
+         set_aspect(p_switch, width , height, srm.width, srm.height);
+
+
 
          //video_driver_set_viewport(srm.width , srm.height,0,0);
          //video_driver_set_size(srm.width , srm.height);
@@ -239,8 +255,8 @@ static void switch_res_crt(
          if (super_width > 900)
          {
             super_width = srm.width;
-            crt_switch_driver_reinit();
-            video_driver_apply_state_changes();
+            //crt_switch_driver_reinit();
+            //video_driver_apply_state_changes();
          }
          #endif
 
@@ -248,6 +264,11 @@ static void switch_res_crt(
          video_driver_apply_state_changes();
 
          
+      }else{
+         set_aspect(p_switch, width , height, 0,0);
+         video_driver_set_size(width , height); 
+         video_driver_apply_state_changes();
+
       }
    }
 }
