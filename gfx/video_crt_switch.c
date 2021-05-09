@@ -101,7 +101,7 @@ static void set_aspect(videocrt_switch_t *p_switch, unsigned int width, unsigned
 {
    if (srm_width > 0)
    {
-      if ((srm_width > width || srm_height > height) || (srm_width > width || srm_height > height))
+      if ( (srm_width > width || srm_height > height) || (srm_width < width || srm_height < height) )
       {
       int aw = srm_width/width;
       int ah = srm_height/height;
@@ -217,7 +217,7 @@ static void switch_res_crt(
             SRobj->deinit();
             
          }
-         
+         set_aspect(p_switch, width , height, srm.width, srm.height);
 
       }else {
          SRobj->deinit();
