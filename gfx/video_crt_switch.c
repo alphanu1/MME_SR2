@@ -218,6 +218,9 @@ static void switch_res_crt(
             
          }
          set_aspect(p_switch, width , height, srm.width, srm.height);
+         video_driver_set_size(srm.width , srm.height); 
+         p_switch->ra_core_hz = srm.refresh;
+         video_driver_apply_state_changes();
 
       }else {
          SRobj->deinit();
