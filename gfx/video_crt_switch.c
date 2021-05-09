@@ -141,7 +141,7 @@ static void switch_res_crt(
    char index = 0;
    char mindex[1];
 
-   if (monitor_index < 10)
+   if (monitor_index+1 >= 0 && monitor_index+1 < 10)
       index = monitor_index+48;
    else
       index = '0';
@@ -157,7 +157,7 @@ static void switch_res_crt(
    #endif
    double rr = p_switch->ra_core_hz;
 
-   RARCH_LOG("SRobj: RA Monitor Index: %s\n",mindex);
+   
 
    if (sr2_active == false)
    {
@@ -191,13 +191,14 @@ static void switch_res_crt(
       
       if (monitor_index+1 > 0)
       {
+         RARCH_LOG("SRobj: RA Monitor Index: %s\n",mindex);
          rtn = SRobj->sr_init_disp(mindex); 
          RARCH_LOG("[CRT]: SR Disp Monitor Index: %s  \n", mindex);
       }
 
       if (monitor_index == -1)
       {
-
+            RARCH_LOG("SRobj: RA Monitor Index: %s\n",NULL);
             rtn = SRobj->sr_init_disp(NULL);
             RARCH_LOG("[CRT]: SR Disp Monitor Index: Auto  \n");
       }
