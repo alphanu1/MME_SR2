@@ -92,9 +92,14 @@ static void crt_aspect_ratio_switch(
       unsigned width, unsigned height)
 {
    /* send aspect float to video_driver */
+   RARCH_LOG("[CRT]: Setting Video Screen Size to: %dx%d \n", width, height);
+   video_driver_set_size(srm.width , srm.height); 
+   p_switch->ra_core_hz = srm.refresh;
+
    p_switch->fly_aspect = (float)width / (float)height;
    video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
    RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
+   video_driver_apply_state_changes();
 }
 
 static void set_aspect(videocrt_switch_t *p_switch, unsigned int width, unsigned int height, unsigned int srm_width, unsigned srm_height)
@@ -218,9 +223,6 @@ static void switch_res_crt(
             
          }
          set_aspect(p_switch, width , height, srm.width, srm.height);
-         video_driver_set_size(srm.width , srm.height); 
-         p_switch->ra_core_hz = srm.refresh;
-         video_driver_apply_state_changes();
 
       }else {
          SRobj->deinit();
@@ -250,8 +252,6 @@ static void switch_res_crt(
 
          set_aspect(p_switch, width , height, srm.width, srm.height);
 
-
-
          //video_driver_set_viewport(srm.width , srm.height,0,0);
          //video_driver_set_size(srm.width , srm.height);
 
@@ -263,10 +263,6 @@ static void switch_res_crt(
             //video_driver_apply_state_changes();
          }
          #endif
-
-         video_driver_set_size(srm.width , srm.height); 
-         video_driver_apply_state_changes();
-
          
       }else{
          set_aspect(p_switch, width , height, 0,0);
@@ -380,7 +376,7 @@ void crt_switch_res_core(
 
             }
             
-            video_driver_apply_state_changes();
+            //video_driver_apply_state_changes();
 
             p_switch->ra_tmp_height     = p_switch->ra_core_height;
             p_switch->ra_tmp_width      = p_switch->ra_core_width;
