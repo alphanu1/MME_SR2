@@ -41,6 +41,8 @@
 static LIBTYPE dlp;
 static srAPI* SRobj;
 static sr_mode srm;
+unsigned int scaled_width;
+unsigned int scaled_height;
 
 static int rescheck = 0;
 static bool sr2_active = false;
@@ -105,7 +107,7 @@ static void crt_aspect_ratio_switch(
    RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
 
    video_driver_apply_state_changes();
-   crt_switch_driver_reinit();
+   //crt_switch_driver_reinit();
    //video_driver_set_video_mode(width, height, true);
 }
 
@@ -240,6 +242,8 @@ static void switch_res_crt(
          }
          p_switch->ra_core_hz = srm.refresh;
          set_aspect(p_switch, width , height, srm.width, srm.height);
+         scaled_height = srm.height;
+         scaled_width = srm.width;
 
 
       }else {
@@ -361,6 +365,11 @@ void crt_switch_res_core(
             p_switch->ra_tmp_width      = p_switch->ra_core_width;
             p_switch->tmp_center_adjust = p_switch->center_adjust;
             p_switch->tmp_porch_adjust  = p_switch->porch_adjust;
+         }
+         if ( sr2_active ==true && (width != scaled_width || height != scaled_height))
+         {
+            video_driver_set_size(width , height); 
+            video_driver_apply_state_changes();
          }
          /* Check if aspect is correct, if not change */
          if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
