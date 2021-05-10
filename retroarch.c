@@ -31830,9 +31830,13 @@ static void video_driver_frame(const void *data, unsigned width,
 
  }
 
-void crt_switch_driver_reinit(void)
+void crt_switch_driver_reinit(unsigned crt_width,unsigned crt_height, unsigned fullscreen)
 {
-   video_context_driver_reset();
+      struct rarch_state            *p_rarch = &rarch_st;
+
+      p_rarch->video_driver_poke->set_video_mode(p_rarch->video_driver_data,
+            crt_width, crt_height, fullscreen);
+   //video_context_driver_reset();
    //video_driver_reinit(DRIVERS_CMD_ALL);
 }
 

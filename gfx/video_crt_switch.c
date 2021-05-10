@@ -107,7 +107,7 @@ static void crt_aspect_ratio_switch(
    RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
 
    video_driver_apply_state_changes();
-   //crt_switch_driver_reinit();
+   crt_switch_driver_reinit(width, height, true);
    //video_driver_set_video_mode(width, height, true);
 }
 
