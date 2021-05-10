@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <libretro.h>
 
 #include "../retroarch.h"
 #include <retro_common_api.h>
@@ -91,30 +92,30 @@ static void crt_aspect_ratio_switch(
       videocrt_switch_t *p_switch,
       unsigned width, unsigned height)
 {
+   //struct video_viewport vp;
+  
    /* send aspect float to video_driver */
    RARCH_LOG("[CRT]: Setting Video Screen Size to: %dx%d \n", width, height);
-   video_driver_set_size(srm.width , srm.height); 
-   p_switch->ra_core_hz = srm.refresh;
-
+   video_driver_set_size(width , height); 
+   video_driver_set_viewport(width , height,0,0);
+   //video_driver_get_viewport_info(&vp);
+   //video_driver_update_viewport( &vp, true, true);
    p_switch->fly_aspect = (float)width / (float)height;
    video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
    RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
+
    video_driver_apply_state_changes();
+   crt_switch_driver_reinit();
+   //video_driver_set_video_mode(width, height, true);
 }
 
 static void set_aspect(videocrt_switch_t *p_switch, unsigned int width, unsigned int height, unsigned int srm_width, unsigned srm_height)
 {
-   if (srm_width > width)
+
+   if ( srm_width > 0)
    {
-      if ( (srm_width > width || srm_height > height) || (srm_width < width || srm_height < height) )
-      {
-      int aw = srm_width/width;
-      int ah = srm_height/height;
-      int bw = width*aw;
-      int bh = height*ah;
-         
-      crt_aspect_ratio_switch(p_switch, bw , bh);
-      }
+         crt_aspect_ratio_switch(p_switch, srm_width, srm_height);
+
    }else{
       crt_aspect_ratio_switch(p_switch, width , height);
    }
@@ -222,7 +223,9 @@ static void switch_res_crt(
             SRobj->deinit();
             
          }
+         p_switch->ra_core_hz = srm.refresh;
          set_aspect(p_switch, width , height, srm.width, srm.height);
+
 
       }else {
          SRobj->deinit();
@@ -334,6 +337,7 @@ void crt_switch_res_core(
       
       if (height != 4 )
       {
+         //video_context_driver_free();
 		   p_switch->porch_adjust          = crt_switch_porch_adjust;
          p_switch->ra_core_height        = height;
          p_switch->ra_core_hz            = hz;
@@ -386,11 +390,11 @@ void crt_switch_res_core(
          /* Check if aspect is correct, if not change */
          if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
          {
-            RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
+            RARCH_LOG("[CRT]: Restoring Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
             video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
             video_driver_apply_state_changes();
          }
-
+         
 
       }
 }

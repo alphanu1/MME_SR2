@@ -31832,7 +31832,8 @@ static void video_driver_frame(const void *data, unsigned width,
 
 void crt_switch_driver_reinit(void)
 {
-   video_driver_reinit(DRIVERS_CMD_ALL);
+   video_context_driver_reset();
+   //video_driver_reinit(DRIVERS_CMD_ALL);
 }
 
 void video_driver_display_type_set(enum rarch_display_type type)
