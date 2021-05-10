@@ -95,7 +95,7 @@ static void crt_aspect_ratio_switch(
       unsigned width, unsigned height)
 {
    //struct video_viewport vp;
-  
+  crt_switch_driver_refresh(width, height, true);
    /* send aspect float to video_driver */
    RARCH_LOG("[CRT]: Setting Video Screen Size to: %dx%d \n", width, height);
    video_driver_set_size(width , height); 
@@ -107,7 +107,7 @@ static void crt_aspect_ratio_switch(
    RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
 
    video_driver_apply_state_changes();
-   crt_switch_driver_reinit(width, height, true);
+   
    //video_driver_set_video_mode(width, height, true);
 }
 

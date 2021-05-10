@@ -31830,7 +31830,7 @@ static void video_driver_frame(const void *data, unsigned width,
 
  }
 
-void crt_switch_driver_reinit(unsigned crt_width,unsigned crt_height, unsigned fullscreen)
+void crt_switch_driver_refresh(unsigned crt_width,unsigned crt_height, unsigned fullscreen)
 {
       struct rarch_state            *p_rarch = &rarch_st;
 
