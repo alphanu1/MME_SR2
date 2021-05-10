@@ -8618,11 +8618,12 @@ unsigned menu_displaylist_build_list(
       case DISPLAYLIST_CORE_SETTINGS_LIST:
          {
             menu_displaylist_build_info_t build_list[] = {
-               {MENU_ENUM_LABEL_VIDEO_SHARED_CONTEXT,  PARSE_ONLY_BOOL},
-               {MENU_ENUM_LABEL_DRIVER_SWITCH_ENABLE,  PARSE_ONLY_BOOL},
-               {MENU_ENUM_LABEL_DUMMY_ON_CORE_SHUTDOWN, PARSE_ONLY_BOOL},
-               {MENU_ENUM_LABEL_CHECK_FOR_MISSING_FIRMWARE, PARSE_ONLY_BOOL},
-               {MENU_ENUM_LABEL_VIDEO_ALLOW_ROTATE,    PARSE_ONLY_BOOL},
+               {MENU_ENUM_LABEL_VIDEO_SHARED_CONTEXT,              PARSE_ONLY_BOOL},
+               {MENU_ENUM_LABEL_DRIVER_SWITCH_ENABLE,              PARSE_ONLY_BOOL},
+               {MENU_ENUM_LABEL_DUMMY_ON_CORE_SHUTDOWN,            PARSE_ONLY_BOOL},
+               {MENU_ENUM_LABEL_CHECK_FOR_MISSING_FIRMWARE,        PARSE_ONLY_BOOL},
+               {MENU_ENUM_LABEL_VIDEO_ALLOW_ROTATE,                PARSE_ONLY_BOOL},
+               {MENU_ENUM_LABEL_CORE_INFO_CACHE_ENABLE,            PARSE_ONLY_BOOL},
 #ifndef HAVE_DYNAMIC
                {MENU_ENUM_LABEL_ALWAYS_RELOAD_CORE_ON_RUN_CONTENT, PARSE_ONLY_BOOL},
 #endif
@@ -9833,6 +9834,7 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
          /* No-op */
          break;
 #endif
+#ifndef HAVE_LAKKA_SWITCH
 #ifdef HAVE_LAKKA
       case DISPLAYLIST_CPU_POLICY_LIST:
          menu_entries_ctl(MENU_ENTRIES_CTL_CLEAR, info->list);
@@ -9885,6 +9887,7 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
          info->need_clear   = true;
          break;
       }
+#endif
 #endif
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
       case DISPLAYLIST_SWITCH_CPU_PROFILE:

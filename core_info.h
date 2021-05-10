@@ -89,6 +89,7 @@ typedef struct
    bool database_match_archive_member;
    bool is_experimental;
    bool is_locked;
+   bool is_installed;
 } core_info_t;
 
 /* A subset of core_info parameters required for
@@ -156,7 +157,7 @@ bool core_info_get_current_core(core_info_t **core);
 void core_info_deinit_list(void);
 
 bool core_info_init_list(const char *path_info, const char *dir_cores,
-      const char *exts, bool show_hidden_files);
+      const char *exts, bool show_hidden_files, bool enable_cache);
 
 bool core_info_get_list(core_info_list_t **core);
 
@@ -202,6 +203,12 @@ bool core_info_get_core_lock(const char *core_path, bool validate_path);
 core_info_state_t *coreinfo_get_ptr(void);
 
 bool core_info_core_file_id_is_equal(const char *core_path_a, const char *core_path_b);
+
+/* When called, generates a temporary file
+ * that will force an info cache refresh the
+ * next time that core info is initialised with
+ * caching enabled */
+bool core_info_cache_force_refresh(const char *path_info);
 
 RETRO_END_DECLS
 
