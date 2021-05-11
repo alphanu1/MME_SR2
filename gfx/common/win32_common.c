@@ -1062,6 +1062,9 @@ static LRESULT CALLBACK wnd_proc_common_dinput_internal(HWND hwnd,
 
    switch (message)
    {
+      case WM_DISPLAYCHANGE:         /* to prevent video rezise when using SR */ 
+         ShowWindow(hwnd, SW_MAXIMIZE);
+         break;
       case WM_KEYUP:                /* Key released */
       case WM_SYSKEYUP:             /* Key released */
          keydown                  = false;
