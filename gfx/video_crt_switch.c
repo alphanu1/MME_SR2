@@ -36,7 +36,7 @@
 #define LIBSWR "libswitchres.dll"
 #endif
 
-#include <switchres/switchres_wrapper.h>
+#include "switchres_wrapper.h"
 
 
 static LIBTYPE dlp;
@@ -61,32 +61,7 @@ static void crt_rpi_switch(int width, int height, float hz, int xoffset);
 
 static void switch_crt_hz(videocrt_switch_t *p_switch)
 {
- 
-
-   /* set hz float to an int for windows switching */
-   /*
-   if (ra_core_hz < 100)
-   {
-      if (ra_core_hz < 53)
-         p_switch->ra_set_core_hz = 50;
-      if (ra_core_hz >= 53  &&  ra_core_hz < 57)
-         p_switch->ra_set_core_hz = 55;
-      if (ra_core_hz >= 57)
-         p_switch->ra_set_core_hz = 60;
-   }
-
-   if (ra_core_hz > 100)
-   {
-      if (ra_core_hz < 106)
-         p_switch->ra_set_core_hz = 120;
-      if (ra_core_hz >= 106  &&  ra_core_hz < 114)
-         p_switch->ra_set_core_hz = 110;
-      if (ra_core_hz >= 114)
-         p_switch->ra_set_core_hz = 120;
-   }
-   */
    video_monitor_set_refresh_rate(p_switch->ra_core_hz);
-
    p_switch->ra_tmp_core_hz = p_switch->ra_core_hz;
 }
 
@@ -95,7 +70,6 @@ static void crt_aspect_ratio_switch(
       videocrt_switch_t *p_switch,
       unsigned width, unsigned height)
 {
-   //struct video_viewport vp;
   
    /* send aspect float to video_driver */
    RARCH_LOG("[CRT]: Setting Video Screen Size to: %dx%d \n", width, height);
@@ -121,7 +95,6 @@ static void set_aspect(videocrt_switch_t *p_switch, unsigned int width,
    int scaled_height = roundf(height*srm_yscale);
 
    crt_aspect_ratio_switch(p_switch, scaled_width, scaled_height);
-
 }
 
 static bool crt_sr2_init(int monitor_index)
@@ -144,12 +117,11 @@ static bool crt_sr2_init(int monitor_index)
 
       /* Loading failed, inform and exit */
       if (!dlp) {
-         //printf("Loading %s failed.\n", LIBSWR);
-         //printf("Error: %s\n", LIBERROR());
+         RARCH_LOG("[CRT]: Switchres Library not found \n");
          
       }
       
-      // Load the init()
+      /* Load SR2 */
       LIBERROR();
       SRobj =  (srAPI*)LIBFUNC(dlp, "srlib");
       sr2_active = true;
@@ -159,14 +131,16 @@ static bool crt_sr2_init(int monitor_index)
          CLOSELIB(dlp);  
          sr2_active = false;
          RARCH_LOG("[CRT]: Switchres Library failed to load \n");
+      }else{
+         RARCH_LOG("[CRT]: Switchres Library Loaded \n");
       }
+
       RARCH_LOG("[CRT]: SR init \n");
       SRobj->init();
       SRobj->sr_set_log_level (3);
       SRobj->sr_set_log_callback_info(RARCH_LOG);
       SRobj->sr_set_log_callback_debug(RARCH_LOG);
       SRobj->sr_set_log_callback_error(RARCH_LOG);
-      
       
       RARCH_LOG("[CRT]: SR init_disp \n");
       if (monitor_index+1 > 0)
@@ -178,12 +152,12 @@ static bool crt_sr2_init(int monitor_index)
 
       if (monitor_index == -1)
       {
-            RARCH_LOG("SRobj: RA Monitor Index: %s\n",NULL);
-            rtn = SRobj->sr_init_disp(NULL);
-            RARCH_LOG("[CRT]: SR Disp Monitor Index: Auto  \n");
+         RARCH_LOG("SRobj: RA Monitor Index: %s\n",NULL);
+         rtn = SRobj->sr_init_disp(NULL);
+         RARCH_LOG("[CRT]: SR Disp Monitor Index: Auto  \n");
       }
 
-       RARCH_LOG("[CRT]: SR rtn %d \n", rtn);
+      RARCH_LOG("[CRT]: SR rtn %d \n", rtn);
 
    }
    
@@ -205,41 +179,31 @@ static void switch_res_crt(
 {
    unsigned char interlace = 0,   ret;
    const char* err_msg;
-   
-   #ifdef __linux__
-      int w = native_width, h = height;
-      super_width = w;
-   #elif _WIN32
-      int w = native_width, h = height;
-      super_width = w;
-   #endif
+   int w = native_width, h = height;
    double rr = p_switch->ra_core_hz;
 
-   
+     
+   if (crt_sr2_init(monitor_index)) /* Checked SR2 is loded if not Load it */
+   {
 
-     // Load the lib
-      if (crt_sr2_init(monitor_index))
+      ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
+      if(!ret) 
       {
-
-         ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
-         if(!ret) 
-         {
             SRobj->deinit();
             
-         }
-         p_switch->ra_core_hz = srm.refresh;
-         set_aspect(p_switch, width , height, srm.width, srm.height, srm.x_scale, srm.y_scale);
-         //scaled_height = srm.height;
-         //scaled_width = srm.width;
-         RARCH_LOG("[CRT]: SR scaled  X:%d Y:%d \n",srm.x_scale, srm.y_scale);
-
-      }else {
-
-         set_aspect(p_switch, width , height, width, height ,1,1);
-         video_driver_set_size(width , height); 
-         video_driver_apply_state_changes();
-
       }
+      p_switch->ra_core_hz = srm.refresh;
+      set_aspect(p_switch, w , h, srm.width, srm.height, srm.x_scale, srm.y_scale);
+      RARCH_LOG("[CRT]: SR scaled  X:%d Y:%d \n",srm.x_scale, srm.y_scale);
+
+   }else {
+      set_aspect(p_switch, width , height, width, height ,1,1);
+      video_driver_set_size(width , height); 
+      video_driver_apply_state_changes();
+      #if defined(HAVE_VIDEOCORE)
+         crt_rpi_switch(width, height, p_switch->ra_core_hz, 0)
+      #endif
+   }
 }
 
 void crt_destroy_modes(videocrt_switch_t *p_switch)
@@ -288,88 +252,54 @@ void crt_switch_res_core(
       int crt_switch_porch_adjust,
       int monitor_index, bool dynamic)
 {
-      /* ra_core_hz float passed from within */
-    /*  if (width == 4 )
+     
+   if (height != 4 )
+   {
+
+	   p_switch->porch_adjust          = crt_switch_porch_adjust;
+      p_switch->ra_core_height        = height;
+      p_switch->ra_core_hz            = hz;
+
+      if (dynamic)
+         p_switch->ra_core_width      = crt_compute_dynamic_width(p_switch, width);
+      else 
+         p_switch->ra_core_width      = width;
+
+      p_switch->center_adjust         = crt_switch_center_adjust;
+      p_switch->index                 = monitor_index;
+
+      /* Detect resolution change and switch */
+      if ( 
+            (p_switch->ra_tmp_height != p_switch->ra_core_height) ||
+            (p_switch->ra_core_width != p_switch->ra_tmp_width) || 
+            (p_switch->center_adjust != p_switch->tmp_center_adjust||
+             p_switch->porch_adjust  !=  p_switch->tmp_porch_adjust )
+         )
       {
-         width = 640;
-      }
-      if (height == 4 )
-      {
-         height = 480;
-      }
-      */
-      //video_driver_set_size(srm_curr_width , srm_curr_height);
+         RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", width, height, hz);
 
-      
-      if (height != 4 )
-      {
-         //video_context_driver_free();
-		   p_switch->porch_adjust          = crt_switch_porch_adjust;
-         p_switch->ra_core_height        = height;
-         p_switch->ra_core_hz            = hz;
+         switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1);
 
-         if (dynamic)
-            p_switch->ra_core_width      = crt_compute_dynamic_width(p_switch, width);
-         else 
-            p_switch->ra_core_width      = width;
-
-         p_switch->center_adjust         = crt_switch_center_adjust;
-         p_switch->index                 = monitor_index;
-/*
-         if (crt_mode == 2)
+         if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
          {
-            if (hz > 53)
-               p_switch->ra_core_hz      = hz * 2;
-            if (hz <= 53)
-               p_switch->ra_core_hz      = 120.0f;
-         }
- */        
-         //crt_handheld_fix(p_switch);
-         /* Detect resolution change and switch */
-         if ( 
-               (p_switch->ra_tmp_height != p_switch->ra_core_height) ||
-               (p_switch->ra_core_width != p_switch->ra_tmp_width) || 
-               (p_switch->center_adjust != p_switch->tmp_center_adjust||
-                p_switch->porch_adjust  !=  p_switch->tmp_porch_adjust )
-            )
-         {
-            #if defined(HAVE_VIDEOCORE)
-            if (height > 300)
-               height = height/2;
-            #endif
-            RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", width, height, hz);
-            
-            switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1);
-            if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
-            {
-               switch_crt_hz(p_switch);
+            switch_crt_hz(p_switch);
 
-            }
-            
-            //video_driver_apply_state_changes();
-
-            p_switch->ra_tmp_height     = p_switch->ra_core_height;
-            p_switch->ra_tmp_width      = p_switch->ra_core_width;
-            p_switch->tmp_center_adjust = p_switch->center_adjust;
-            p_switch->tmp_porch_adjust  = p_switch->porch_adjust;
-         }
-         /*
-         if ( sr2_active ==true && (width != scaled_width || height != scaled_height))
-         {
-            video_driver_set_size(width , height); 
-            video_driver_apply_state_changes();
-         }
-         */
-         /* Check if aspect is correct, if not change */
-         if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
-         {
-            RARCH_LOG("[CRT]: Restoring Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
-            video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
-            video_driver_apply_state_changes();
          }
          
-
+         p_switch->ra_tmp_height     = p_switch->ra_core_height;
+         p_switch->ra_tmp_width      = p_switch->ra_core_width;
+         p_switch->tmp_center_adjust = p_switch->center_adjust;
+         p_switch->tmp_porch_adjust  = p_switch->porch_adjust;
       }
+
+      if (video_driver_get_aspect_ratio() != p_switch->fly_aspect)
+      {
+         RARCH_LOG("[CRT]: Restoring Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
+         video_driver_set_aspect_ratio_value((float)p_switch->fly_aspect);
+         video_driver_apply_state_changes();
+      }
+
+   }
 }
 /* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
@@ -398,6 +328,9 @@ static void crt_rpi_switch(int width, int height, float hz, int xoffset)
    float roundw                        = 0.0f;
    float roundh                        = 0.0f;
    float pixel_clock                   = 0.0f;
+
+   if (height > 300)
+      height = height/2;
 
    /* set core refresh from hz */
    video_monitor_set_refresh_rate(hz);
