@@ -25,6 +25,7 @@
 #include <boolean.h>
 #include <retro_common_api.h>
 
+
 RETRO_BEGIN_DECLS
 
 typedef struct videocrt_switch
@@ -35,21 +36,29 @@ typedef struct videocrt_switch
    int porch_adjust;
    int tmp_porch_adjust;
    int tmp_center_adjust;
+   int rtn;
    unsigned ra_core_width;
    unsigned ra_core_height;
    unsigned ra_tmp_width;
    unsigned ra_tmp_height;
    unsigned ra_set_core_hz;
    unsigned index;
+   unsigned int fb_width;
+   unsigned int fb_height;
 
    float ra_core_hz;
    float ra_tmp_core_hz;
    float fly_aspect;
 
+   bool sr2_active;
+   bool menu_active;
+
+
 } videocrt_switch_t;
 
 void crt_switch_res_core(
       videocrt_switch_t *p_switch,
+      unsigned naitive_width,
       unsigned width,
       unsigned height,
       float hz,
@@ -57,7 +66,10 @@ void crt_switch_res_core(
       int crt_switch_center_adjust,
       int crt_switch_porch_adjust,
       int monitor_index,
-      bool dynamic);
+      bool dynamic,
+      int super_width);
+
+void crt_destroy_modes(videocrt_switch_t *p_switch);
 
 RETRO_END_DECLS
 

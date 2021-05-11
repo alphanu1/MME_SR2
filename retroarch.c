@@ -31420,6 +31420,7 @@ static void video_driver_frame(const void *data, unsigned width,
 #if defined(HAVE_GFX_WIDGETS)
    bool widgets_active          = p_rarch->widgets_active;
 #endif
+   static int native_width = 0;
 
    status_text[0]                  = '\0';
    video_driver_msg[0]          = '\0';
@@ -31789,7 +31790,7 @@ static void video_driver_frame(const void *data, unsigned width,
    if (video_info.crt_switch_resolution)
    {
       p_rarch->video_driver_crt_switching_active          = true;
-
+      native_width = width;
       switch (video_info.crt_switch_resolution_super)
       {
          case 2560:
@@ -31809,22 +31810,24 @@ static void video_driver_frame(const void *data, unsigned width,
 
       crt_switch_res_core(
             &p_rarch->crt_switch_st,
-            width,
+            native_width, width,
             height,
             p_rarch->video_driver_core_hz,
             video_info.crt_switch_resolution,
             video_info.crt_switch_center_adjust,
             video_info.crt_switch_porch_adjust,
             video_info.monitor_index,
-            p_rarch->video_driver_crt_dynamic_super_width);
+            p_rarch->video_driver_crt_dynamic_super_width,
+            video_info.crt_switch_resolution_super);
    }
    else if (!video_info.crt_switch_resolution)
       p_rarch->video_driver_crt_switching_active = false;
 }
 
-void crt_switch_driver_reinit(void)
+void crt_switch_driver_refresh(void)
 {
-   video_driver_reinit(DRIVERS_CMD_ALL);
+   //video_context_driver_reset();
+   video_driver_reinit(DRIVER_VIDEO_MASK);
 }
 
 void video_driver_display_type_set(enum rarch_display_type type)
@@ -33363,6 +33366,14 @@ static void retroarch_deinit_drivers(
    cbs->state_cb                                    = NULL;
 
    p_rarch->current_core.inited                     = false;
+
+      /* Switchres deinit */
+   if (p_rarch->video_driver_crt_switching_active) {
+      RARCH_LOG("[CRT]: Getting video info\n");
+      RARCH_LOG("[CRT]: About to destroy SR\n");
+      crt_destroy_modes(&p_rarch->crt_switch_st);
+   }
+
 }
 
 bool driver_ctl(enum driver_ctl_state state, void *data)
