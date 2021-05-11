@@ -1,0 +1,10 @@
+prefix=/usr
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: libswitchres
+Description: A basic switchres implementation
+Version: 2.00
+Cflags: -I${includedir}/switchres
+Libs: -L${libdir} -ldl -lswitchres

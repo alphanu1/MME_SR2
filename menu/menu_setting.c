@@ -6087,7 +6087,13 @@ static void setting_get_string_representation_uint_crt_switch_resolutions(
          strlcpy(s, "15 KHz", len);
          break;
       case CRT_SWITCH_31KHZ:
-         strlcpy(s, "31 KHz", len);
+         strlcpy(s, "31 KHz, Standard", len);
+         break;
+      case CRT_SWITCH_32_120:
+         strlcpy(s, "31 KHz, 120Hz", len);
+         break;
+      case CRT_SWITCH_INI:
+         strlcpy(s, "INI", len);
          break;
    }
 }
@@ -11611,7 +11617,7 @@ static bool setting_append_list(
          (*list)[list_info->index - 1].get_string_representation =
             &setting_get_string_representation_uint_crt_switch_resolutions;
          SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ADVANCED);
-         menu_settings_list_current_add_range(list, list_info, CRT_SWITCH_NONE, CRT_SWITCH_31KHZ, 1.0, true, true);
+         menu_settings_list_current_add_range(list, list_info, CRT_SWITCH_NONE, CRT_SWITCH_INI, 1.0, true, true);
 
 			CONFIG_UINT(
 				  list, list_info,
