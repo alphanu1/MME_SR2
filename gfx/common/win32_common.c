@@ -642,6 +642,26 @@ static void win32_save_position(void)
    }
 }
 
+static void win32_resize_after_display_change(HWND hwnd)
+{
+   HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+
+   if (monitor != NULL)
+   {
+      MONITORINFO info;
+      memset(&info, 0, sizeof(info));
+      info.cbSize = sizeof(info);
+
+      if (GetMonitorInfo(monitor, &info))
+      {
+         int new_width = abs(info.rcMonitor.right - info.rcMonitor.left);
+         int new_height = abs(info.rcMonitor.bottom - info.rcMonitor.top);
+
+         SetWindowPos(hwnd, 0, 0, 0, new_width, new_height, SWP_NOMOVE);
+      }
+   }
+}
+
 static bool win32_browser(
       HWND owner,
       char *filename,
@@ -1046,6 +1066,9 @@ static LRESULT CALLBACK wnd_proc_common_internal(HWND hwnd,
             win32_clip_window(false);
          break;
 #endif
+      case WM_DISPLAYCHANGE:  /* fix size after display mode switch when using SR */
+         win32_resize_after_display_change(hwnd);
+         break;
    }
 
    return DefWindowProc(hwnd, message, wparam, lparam);
@@ -1060,11 +1083,6 @@ static LRESULT CALLBACK wnd_proc_common_dinput_internal(HWND hwnd,
    bool quit                     = false;
    win32_common_state_t *g_win32 = (win32_common_state_t*)&win32_st;
 
-   switch (message)
-   {
-      case WM_DISPLAYCHANGE:         /* to prevent video rezise when using SR */ 
-         ShowWindow(hwnd, SW_MAXIMIZE);
-         break;
       case WM_KEYUP:                /* Key released */
       case WM_SYSKEYUP:             /* Key released */
          keydown                  = false;
@@ -1165,6 +1183,9 @@ static LRESULT CALLBACK wnd_proc_common_dinput_internal(HWND hwnd,
             win32_clip_window(false);
          break;
 #endif
+      case WM_DISPLAYCHANGE:  /* fix size after display mode switch when using SR */
+         win32_resize_after_display_change(hwnd);
+         break;
    }
 
    return DefWindowProc(hwnd, message, wparam, lparam);
