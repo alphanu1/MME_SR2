@@ -1083,6 +1083,8 @@ static LRESULT CALLBACK wnd_proc_common_dinput_internal(HWND hwnd,
    bool quit                     = false;
    win32_common_state_t *g_win32 = (win32_common_state_t*)&win32_st;
 
+   switch (message)
+   {
       case WM_KEYUP:                /* Key released */
       case WM_SYSKEYUP:             /* Key released */
          keydown                  = false;
