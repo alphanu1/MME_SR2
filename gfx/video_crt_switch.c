@@ -147,15 +147,19 @@ static bool crt_sr2_init(unsigned int monitor_index, unsigned int crt_mode, unsi
       SRobj->sr_set_log_callback_debug(RARCH_LOG);
       SRobj->sr_set_log_callback_error(RARCH_LOG);
 
-      if (crt_mode == 2)
-      {
-         SRobj->sr_set_monitor("arcade_31");
-         RARCH_LOG("[CRT]: CRT Mode: %d - arcade_31 \n", crt_mode) ;
-      }else if (crt_mode == 1)
+      if (crt_mode == 1)
       {
          SRobj->sr_set_monitor("arcade_15");
          RARCH_LOG("[CRT]: CRT Mode: %d - arcade_15 \n", crt_mode) ;
+      }else if (crt_mode == 2)
+      {
+         SRobj->sr_set_monitor("arcade_31");
+         RARCH_LOG("[CRT]: CRT Mode: %d - arcade_31 \n", crt_mode) ;
       }else if (crt_mode == 3)
+      {
+         SRobj->sr_set_monitor("pc_31_120");
+         RARCH_LOG("[CRT]: CRT Mode: %d - pc_31_120 \n", crt_mode) ;
+      }else if (crt_mode == 4)
       {
          RARCH_LOG("[CRT]: CRT Mode: %d - Seleted from ini \n", crt_mode) ;
       }

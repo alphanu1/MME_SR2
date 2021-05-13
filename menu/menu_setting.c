@@ -6092,7 +6092,10 @@ static void setting_get_string_representation_uint_crt_switch_resolutions(
          strlcpy(s, "15 KHz", len);
          break;
       case CRT_SWITCH_31KHZ:
-         strlcpy(s, "31 KHz", len);
+         strlcpy(s, "31 KHz, Standard", len);
+         break;
+      case CRT_SWITCH_32_120:
+         strlcpy(s, "31 KHz, 120Hz", len);
          break;
       case CRT_SWITCH_INI:
          strlcpy(s, "INI", len);
