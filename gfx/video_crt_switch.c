@@ -99,11 +99,14 @@ static void set_aspect(videocrt_switch_t *p_switch, unsigned int width,
    crt_aspect_ratio_switch(p_switch, scaled_width, scaled_height);
 }
 
-static bool crt_sr2_init(int monitor_index)
+static bool crt_sr2_init(unsigned int monitor_index, unsigned int crt_mode, unsigned int super_width)
 {
    const char* err_msg;
+   char* mode;
    char index = 0;
    char mindex[1];
+
+
 
    if (monitor_index+1 >= 0 && monitor_index+1 < 10)
       index = monitor_index+48;
@@ -143,6 +146,23 @@ static bool crt_sr2_init(int monitor_index)
       SRobj->sr_set_log_callback_info(RARCH_LOG);
       SRobj->sr_set_log_callback_debug(RARCH_LOG);
       SRobj->sr_set_log_callback_error(RARCH_LOG);
+
+      if (crt_mode == 2)
+      {
+         SRobj->sr_set_monitor("arcade_31");
+         RARCH_LOG("[CRT]: CRT Mode: %d - arcade_31 \n", crt_mode) ;
+      }else if (crt_mode == 1)
+      {
+         SRobj->sr_set_monitor("arcade_15");
+         RARCH_LOG("[CRT]: CRT Mode: %d - arcade_15 \n", crt_mode) ;
+      }else if (crt_mode == 3)
+      {
+         RARCH_LOG("[CRT]: CRT Mode: %d - Seleted from ini \n", crt_mode) ;
+      }
+
+
+      if (super_width >2 )
+         SRobj->sr_set_user_mode(super_width, 0, 0);
       
       RARCH_LOG("[CRT]: SR init_disp \n");
       if (monitor_index+1 > 0)
@@ -177,7 +197,7 @@ static bool crt_sr2_init(int monitor_index)
 
 static void switch_res_crt(
       videocrt_switch_t *p_switch,
-      unsigned width, unsigned height, unsigned crt_mode, unsigned native_width, int monitor_index)
+      unsigned width, unsigned height, unsigned crt_mode, unsigned native_width, int monitor_index, int super_width)
 {
    unsigned char interlace = 0,   ret;
    const char* err_msg;
@@ -185,9 +205,9 @@ static void switch_res_crt(
    double rr = p_switch->ra_core_hz;
 
      
-   if (crt_sr2_init(monitor_index)) /* Checked SR2 is loded if not Load it */
+   if (crt_sr2_init(monitor_index, crt_mode, super_width)) /* Checked SR2 is loded if not Load it */
    {
-
+ 
       ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
       if(!ret) 
       {
@@ -220,7 +240,7 @@ void crt_destroy_modes(videocrt_switch_t *p_switch)
       }
    }
 }
-
+/*
 static int crt_compute_dynamic_width(
       videocrt_switch_t *p_switch,
       int width)
@@ -245,14 +265,15 @@ static int crt_compute_dynamic_width(
    RARCH_LOG("[CRT]: Dynamic Width Set to: %d \n", dynamic_width );
    return dynamic_width;
 }
-
+*/
 void crt_switch_res_core(
       videocrt_switch_t *p_switch,
       unsigned native_width, unsigned width, unsigned height,
       float hz, unsigned crt_mode,
       int crt_switch_center_adjust,
       int crt_switch_porch_adjust,
-      int monitor_index, bool dynamic)
+      int monitor_index, bool dynamic,
+      int super_width)
 {
      
    if (height != 4 )
@@ -262,10 +283,7 @@ void crt_switch_res_core(
       p_switch->ra_core_height        = height;
       p_switch->ra_core_hz            = hz;
 
-      if (dynamic)
-         p_switch->ra_core_width      = crt_compute_dynamic_width(p_switch, width);
-      else 
-         p_switch->ra_core_width      = width;
+      p_switch->ra_core_width         = width;
 
       p_switch->center_adjust         = crt_switch_center_adjust;
       p_switch->index                 = monitor_index;
@@ -280,7 +298,7 @@ void crt_switch_res_core(
       {
          RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", width, height, hz);
 
-         switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1);
+         switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1, super_width);
 
          if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
          {

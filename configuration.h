@@ -67,7 +67,8 @@ enum crt_switch_type
 {
    CRT_SWITCH_NONE = 0,
    CRT_SWITCH_15KHZ,
-   CRT_SWITCH_31KHZ
+   CRT_SWITCH_31KHZ,
+   CRT_SWITCH_INI
 };
 
 enum override_type

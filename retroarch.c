@@ -31817,7 +31817,8 @@ static void video_driver_frame(const void *data, unsigned width,
             video_info.crt_switch_center_adjust,
             video_info.crt_switch_porch_adjust,
             video_info.monitor_index,
-            p_rarch->video_driver_crt_dynamic_super_width);
+            p_rarch->video_driver_crt_dynamic_super_width,
+            video_info.crt_switch_resolution_super);
    }
    else if (!video_info.crt_switch_resolution)
       p_rarch->video_driver_crt_switching_active = false;

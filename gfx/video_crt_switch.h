@@ -60,7 +60,8 @@ void crt_switch_res_core(
       int crt_switch_center_adjust,
       int crt_switch_porch_adjust,
       int monitor_index,
-      bool dynamic);
+      bool dynamic,
+      int super_width);
 
 void crt_destroy_modes(videocrt_switch_t *p_switch);
 
