@@ -30,6 +30,7 @@
 #include "../core_info.h"
 #include "../verbosity.h"
 
+
 #ifdef __linux__
 #define LIBSWR "libswitchres.so"
 #elif _WIN32
