@@ -43,13 +43,13 @@
 static LIBTYPE dlp;
 static srAPI* SRobj;
 static sr_mode srm;
-unsigned int scaled_width;
-unsigned int scaled_height;
 
-static int rescheck = 0;
 static bool sr2_active = false;
 static int super_width                    = 0;
 int rtn       =0;
+static bool menu_active = false;
+static unsigned int fb_width = 0;
+static unsigned int fb_height = 0;
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -276,7 +276,7 @@ void crt_switch_res_core(
      
    if (height != 4 )
    {
-
+      menu_active = false;
 	   p_switch->porch_adjust          = crt_switch_porch_adjust;
       p_switch->ra_core_height        = height;
       p_switch->ra_core_hz            = hz;
@@ -318,12 +318,20 @@ void crt_switch_res_core(
       }
 
    }else{
-      unsigned int fb_width = 0;
-      unsigned int fb_height = 0;
-      video_driver_get_size(&fb_width, &fb_height);
-      crt_aspect_ratio_switch(p_switch,
-      fb_width, fb_height);
-      RARCH_LOG("[CRT]: Menu Only Dimentions: %d %d \n", fb_width, fb_height);
+      if (menu_active == false)
+      {
+         if (fb_width == 0)
+         {
+            video_driver_get_size(&fb_width, &fb_height);
+            RARCH_LOG("[CRT]: Menu Only Dimentions: %dx%d \n", fb_width, fb_height);
+            crt_aspect_ratio_switch(p_switch,
+            fb_width, fb_height);
+         }else{
+            RARCH_LOG("[CRT]: Menu Only Dimentions resoring: %dx%d \n", fb_width, fb_height);
+            switch_res_crt(p_switch, fb_width, fb_height , crt_mode, fb_width, monitor_index-1, 0);
+         }
+         menu_active = true;
+      }
    }
 }
 /* only used for RPi3 */
