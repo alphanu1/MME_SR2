@@ -326,9 +326,14 @@ void crt_switch_res_core(
             RARCH_LOG("[CRT]: Menu Only Dimentions: %dx%d \n", fb_width, fb_height);
             crt_aspect_ratio_switch(p_switch, fb_width, fb_height);
          }else{
+            unsigned int tmp_fb_width = 0;
+            unsigned int tmp_fb_height = 0;
             RARCH_LOG("[CRT]: Menu Only Dimentions restoring: %dx%d \n", fb_width, fb_height);
             switch_res_crt(p_switch, fb_width, fb_height , crt_mode, 
             fb_width, monitor_index-1, 0);
+            video_driver_get_size(&tmp_fb_width, &tmp_fb_height);
+            RARCH_LOG("[CRT]: Menu Only Fixing Aspect: %dx%d \n", tmp_fb_width, tmp_fb_height);
+            crt_aspect_ratio_switch(p_switch, tmp_fb_width, tmp_fb_height);
          }
          menu_active = true;
       }
