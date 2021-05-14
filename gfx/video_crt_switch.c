@@ -29,6 +29,7 @@
 #include "video_display_server.h"
 #include "../core_info.h"
 #include "../verbosity.h"
+#include "gfx_display.h"
 
 
 #ifdef __linux__
@@ -213,7 +214,11 @@ static void switch_res_crt(
             
       }
       p_switch->ra_core_hz = srm.refresh;
-      set_aspect(p_switch, w , h, srm.width, srm.height, srm.x_scale, srm.y_scale);
+      if (super_width >2 )
+         set_aspect(p_switch, w , h, super_width, srm.height, srm.x_scale, srm.y_scale);
+      else
+         set_aspect(p_switch, w , h, srm.width, srm.height, srm.x_scale, srm.y_scale);
+      
       RARCH_LOG("[CRT]: SR scaled  X:%d Y:%d \n",srm.x_scale, srm.y_scale);
 
    }else {
@@ -294,7 +299,7 @@ void crt_switch_res_core(
              p_switch->porch_adjust  !=  p_switch->tmp_porch_adjust )
          )
       {
-         RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", width, height, hz);
+         RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", native_width, height, hz);
 
          switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1, super_width);
 
@@ -328,12 +333,10 @@ void crt_switch_res_core(
          }else{
             unsigned int tmp_fb_width = 0;
             unsigned int tmp_fb_height = 0;
+            size_t tmp_pitch = 0;
             RARCH_LOG("[CRT]: Menu Only Dimentions restoring: %dx%d \n", fb_width, fb_height);
             switch_res_crt(p_switch, fb_width, fb_height , crt_mode, 
-            fb_width, monitor_index-1, 0);
-            video_driver_get_size(&tmp_fb_width, &tmp_fb_height);
-            RARCH_LOG("[CRT]: Menu Only Fixing Aspect: %dx%d \n", tmp_fb_width, tmp_fb_height);
-            crt_aspect_ratio_switch(p_switch, tmp_fb_width, tmp_fb_height);
+            fb_width, monitor_index-1, super_width);
          }
          menu_active = true;
       }
