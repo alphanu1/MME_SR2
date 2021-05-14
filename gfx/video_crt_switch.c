@@ -317,6 +317,13 @@ void crt_switch_res_core(
          video_driver_apply_state_changes();
       }
 
+   }else{
+      unsigned int fb_width = 0;
+      unsigned int fb_height = 0;
+      video_driver_get_size(&fb_width, &fb_height);
+      crt_aspect_ratio_switch(p_switch,
+      fb_width, fb_height);
+      RARCH_LOG("[CRT]: Menu Only Dimentions: %d %d \n", fb_width, fb_height);
    }
 }
 /* only used for RPi3 */
