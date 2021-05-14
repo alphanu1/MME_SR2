@@ -82,12 +82,7 @@ static void crt_aspect_ratio_switch(
    RARCH_LOG("[CRT]: Setting Aspect Ratio: %f \n", (float)p_switch->fly_aspect);
 
    video_driver_apply_state_changes();
-   /*
-   #ifdef __WIN32__
-      crt_switch_driver_refresh();
-   #endif
-   */
-    
+   
 }
 
 static void set_aspect(videocrt_switch_t *p_switch, unsigned int width, 
@@ -106,8 +101,6 @@ static bool crt_sr2_init(unsigned int monitor_index, unsigned int crt_mode, unsi
    char* mode;
    char index = 0;
    char mindex[1];
-
-
 
    if (monitor_index+1 >= 0 && monitor_index+1 < 10)
       index = monitor_index+48;
