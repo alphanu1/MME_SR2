@@ -324,11 +324,12 @@ void crt_switch_res_core(
          {
             video_driver_get_size(&fb_width, &fb_height);
             RARCH_LOG("[CRT]: Menu Only Dimentions: %dx%d \n", fb_width, fb_height);
-            crt_aspect_ratio_switch(p_switch,
-            fb_width, fb_height);
+            crt_aspect_ratio_switch(p_switch, fb_width, fb_height);
          }else{
             RARCH_LOG("[CRT]: Menu Only Dimentions resoring: %dx%d \n", fb_width, fb_height);
-            switch_res_crt(p_switch, fb_width, fb_height , crt_mode, fb_width, monitor_index-1, 0);
+            switch_res_crt(p_switch, fb_width, fb_height , crt_mode, 
+            fb_width, monitor_index-1, 0);
+            crt_aspect_ratio_switch(p_switch, fb_width, fb_height);
          }
          menu_active = true;
       }
