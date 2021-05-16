@@ -31826,7 +31826,7 @@ static void video_driver_frame(const void *data, unsigned width,
 
 void crt_switch_driver_refresh(void)
 {
-   //video_context_driver_reset();
+   /*video_context_driver_reset();*/
    video_driver_reinit(DRIVER_VIDEO_MASK);
 }
 
