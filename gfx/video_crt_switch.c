@@ -128,10 +128,10 @@ static bool crt_sr2_init(videocrt_switch_t *p_switch, unsigned int monitor_index
 
       RARCH_LOG("[CRT]: SR init \n");
       SRobj->init();
-     /* SRobj->sr_set_log_level (3); //removed temporarily to fix comile issues
+      SRobj->sr_set_log_level (3); //removed temporarily to fix comile issues
       SRobj->sr_set_log_callback_info(RARCH_LOG);
       SRobj->sr_set_log_callback_debug(RARCH_LOG);
-      SRobj->sr_set_log_callback_error(RARCH_LOG);  */
+      SRobj->sr_set_log_callback_error(RARCH_LOG);  
 
       if (crt_mode == 1)
       {
@@ -241,7 +241,7 @@ void crt_switch_res_core(
       int monitor_index, bool dynamic,
       int super_width)
 {
-     
+#if !defined(__WINNT) && !defined(__APPLE__) && !defined(__MACH__)
    if (height != 4 )
    {
       p_switch->menu_active           = false;
@@ -304,6 +304,7 @@ void crt_switch_res_core(
          p_switch->menu_active = true;
       }
    }
+   #endif
 }
 /* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
