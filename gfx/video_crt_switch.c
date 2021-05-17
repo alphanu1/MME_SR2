@@ -31,6 +31,10 @@
 #include "../verbosity.h"
 #include "gfx_display.h"
 
+#if defined(__STDC__)
+#define C89
+#endif
+
 #ifdef __linux__
 #define LIBSWR "libswitchres.so"
 #elif _WIN32
@@ -89,6 +93,10 @@ static void set_aspect(videocrt_switch_t *p_switch, unsigned int width,
 
 static bool crt_sr2_init(videocrt_switch_t *p_switch, unsigned int monitor_index, unsigned int crt_mode, unsigned int super_width)
 {
+   #ifdef C89
+      return false;
+   #endif
+
    const char* err_msg;
    char* mode;
    char index = 0;
@@ -241,7 +249,7 @@ void crt_switch_res_core(
       int monitor_index, bool dynamic,
       int super_width)
 {
-#if !defined(__WINNT) && !defined(__APPLE__) && !defined(__MACH__)
+
    if (height != 4 )
    {
       p_switch->menu_active           = false;
@@ -304,7 +312,7 @@ void crt_switch_res_core(
          p_switch->menu_active = true;
       }
    }
-   #endif
+   
 }
 /* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
