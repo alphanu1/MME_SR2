@@ -31,10 +31,6 @@
 #include "../verbosity.h"
 #include "gfx_display.h"
 
-#if defined(__STDC__)
-#define C89
-#endif
-
 #ifdef __linux__
 #define LIBSWR "libswitchres.so"
 #elif _WIN32
@@ -91,12 +87,8 @@ static void set_aspect(videocrt_switch_t *p_switch, unsigned int width,
    crt_aspect_ratio_switch(p_switch, scaled_width, scaled_height);
 }
 
-static bool crt_sr2_init(videocrt_switch_t *p_switch, unsigned int monitor_index, unsigned int crt_mode, unsigned int super_width)
+static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigned int crt_mode, unsigned int super_width)
 {
-   #ifdef C89
-      return false;
-   #endif
-
    const char* err_msg;
    char* mode;
    char index = 0;
