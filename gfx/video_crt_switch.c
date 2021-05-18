@@ -37,7 +37,7 @@
 #define LIBSWR "libswitchres.dll"
 #endif
 */
-#include "switchres_wrapper.h"
+#include "../deps/switchres/switchres_wrapper.h"
 
 /*static LIBTYPE dlp; */
 /*static srAPI* SRobj;*/
