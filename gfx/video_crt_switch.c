@@ -30,17 +30,17 @@
 #include "../core_info.h"
 #include "../verbosity.h"
 #include "gfx_display.h"
-
+/*
 #ifdef __linux__
 #define LIBSWR "libswitchres.so"
 #elif _WIN32
 #define LIBSWR "libswitchres.dll"
 #endif
-
+*/
 #include "switchres_wrapper.h"
 
-static LIBTYPE dlp;
-static srAPI* SRobj;
+/*static LIBTYPE dlp; */
+/*static srAPI* SRobj;*/
 static sr_mode srm;
 
 #ifdef HAVE_CONFIG_H
@@ -104,46 +104,26 @@ static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigne
    if (!p_switch->sr2_active)
    {
 
-      dlp = OPENLIB(LIBSWR);
-
-      /* Loading failed, inform and exit */
-      if (!dlp) {
-         RARCH_LOG("[CRT]: Switchres Library not found \n");
-         
-      }
-      
-      /* Load SR2 */
-      LIBERROR();
-      SRobj =  (srAPI*)LIBFUNC(dlp, "srlib");
-      p_switch->sr2_active = true;
-      
-      if ((err_msg = LIBERROR()) != NULL) 
-      {
-         CLOSELIB(dlp);  
-         p_switch->sr2_active = false;
-         RARCH_LOG("[CRT]: Switchres Library failed to load \n");
-      }else{
-         RARCH_LOG("[CRT]: Switchres Library Loaded \n");
-      }
-
       RARCH_LOG("[CRT]: SR init \n");
-      SRobj->init();
-      SRobj->sr_set_log_level (3); //removed temporarily to fix comile issues
-      SRobj->sr_set_log_callback_info(RARCH_LOG);
-      SRobj->sr_set_log_callback_debug(RARCH_LOG);
-      SRobj->sr_set_log_callback_error(RARCH_LOG);  
+
+
+      sr_init();
+      sr_set_log_level (3);
+      sr_set_log_callback_info(RARCH_LOG);
+      sr_set_log_callback_debug(RARCH_LOG);
+      sr_set_log_callback_error(RARCH_LOG);
 
       if (crt_mode == 1)
       {
-         SRobj->sr_set_monitor("arcade_15");
+         sr_set_monitor("arcade_15");
          RARCH_LOG("[CRT]: CRT Mode: %d - arcade_15 \n", crt_mode) ;
       }else if (crt_mode == 2)
       {
-         SRobj->sr_set_monitor("arcade_31");
+         sr_set_monitor("arcade_31");
          RARCH_LOG("[CRT]: CRT Mode: %d - arcade_31 \n", crt_mode) ;
       }else if (crt_mode == 3)
       {
-         SRobj->sr_set_monitor("pc_31_120");
+         sr_set_monitor("pc_31_120");
          RARCH_LOG("[CRT]: CRT Mode: %d - pc_31_120 \n", crt_mode) ;
       }else if (crt_mode == 4)
       {
@@ -152,20 +132,20 @@ static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigne
 
 
       if (super_width >2 )
-         SRobj->sr_set_user_mode(super_width, 0, 0);
+         sr_set_user_mode(super_width, 0, 0);
       
       RARCH_LOG("[CRT]: SR init_disp \n");
       if (monitor_index+1 > 0)
       {
          RARCH_LOG("SRobj: RA Monitor Index: %s\n",mindex);
-         p_switch->rtn = SRobj->sr_init_disp(mindex); 
+         p_switch->rtn = sr_init_disp(mindex); 
          RARCH_LOG("[CRT]: SR Disp Monitor Index: %s  \n", mindex);
       }
 
       if (monitor_index == -1)
       {
          RARCH_LOG("SRobj: RA Monitor Index: %s\n",NULL);
-         p_switch->rtn = SRobj->sr_init_disp(NULL);
+         p_switch->rtn = sr_init_disp(NULL);
          RARCH_LOG("[CRT]: SR Disp Monitor Index: Auto  \n");
       }
 
@@ -175,9 +155,11 @@ static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigne
    
    if (p_switch->rtn == 1)
    {
+      p_switch->sr2_active = true;
      return true;
    }else{
-      SRobj->deinit();
+      RARCH_LOG("[CRT]: SR failed to init");
+      sr_deinit();
       p_switch->sr2_active = false;
    } 
 
@@ -197,10 +179,11 @@ static void switch_res_crt(
    if (crt_sr2_init(p_switch, monitor_index, crt_mode, super_width)) /* Checked SR2 is loded if not Load it */
    {
  
-      ret =   SRobj->sr_switch_to_mode(w, h, rr, interlace, &srm);
+      ret =   sr_switch_to_mode(w, h, rr, interlace, &srm);
       if(!ret) 
       {
-            SRobj->deinit();
+         RARCH_LOG("[CRT]: SR failed to switch mode");
+         /*sr_deinit();*/
             
       }
       p_switch->ra_core_hz = srm.refresh;
@@ -223,12 +206,9 @@ void crt_destroy_modes(videocrt_switch_t *p_switch)
 {
    if (p_switch->sr2_active == true)
    {
-      if (SRobj)
-      {   
-         SRobj->deinit();
-         CLOSELIB(dlp);
-         RARCH_LOG("[CRT]: SR Destroyed \n");
-      }
+      sr_deinit();
+      RARCH_LOG("[CRT]: SR Destroyed \n");
+
    }
 }
 

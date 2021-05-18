@@ -678,7 +678,10 @@ fi
 check_enabled 'ZLIB BUILTINZLIB' RPNG RPNG 'zlib is' false
 check_enabled V4L2 VIDEOPROCESSOR 'video processor' 'Video4linux2 is' true
 
-if [ "$HAVE_SR2" = 'yes' ]; then
-   add_define CONFIG HAVE_SR2 1
-   #INCLUDES="${INCLUDES} opt/vc/include"
+if [ "$HAVE_CXX11" = 'yes' ]; then
+   if [ "$OS" = 'Linux' ]; then
+      check_enabled 'VIDEOCORE X11' SR2 'CRT modeswitching' 'CRT is' true
+   else
+      check_platform Win32 SR2 'CRT modeswitching is' true
+   fi
 fi
