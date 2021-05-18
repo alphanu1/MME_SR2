@@ -262,6 +262,7 @@ if [ "$OS" = 'Darwin' ]; then
    check_lib '' AL "-framework OpenAL" alcOpenDevice
    HAVE_X11=no # X11 breaks on recent OSXes even if present.
    HAVE_SDL=no
+   HAVE_SW2=no
 else
    check_lib '' AL -lopenal alcOpenDevice
 fi
@@ -676,3 +677,8 @@ fi
 
 check_enabled 'ZLIB BUILTINZLIB' RPNG RPNG 'zlib is' false
 check_enabled V4L2 VIDEOPROCESSOR 'video processor' 'Video4linux2 is' true
+
+if [ "$HAVE_SR2" = 'yes' ]; then
+   add_define CONFIG HAVE_SR2 1
+   #INCLUDES="${INCLUDES} opt/vc/include"
+fi

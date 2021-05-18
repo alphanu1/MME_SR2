@@ -225,7 +225,9 @@
 #include "gfx/video_thread_wrapper.h"
 #endif
 #include "gfx/video_display_server.h"
-#include "gfx/video_crt_switch.h"
+#ifdef HAVE_SR2
+   #include "gfx/video_crt_switch.h"
+#endif
 #include "bluetooth/bluetooth_driver.h"
 #include "wifi/wifi_driver.h"
 #include "led/led_driver.h"
@@ -31807,7 +31809,7 @@ static void video_driver_frame(const void *data, unsigned width,
             p_rarch->video_driver_crt_dynamic_super_width = false;
             break;
       }
-
+      #ifdef HAVE_SR2
       crt_switch_res_core(
             &p_rarch->crt_switch_st,
             native_width, width,
@@ -31819,6 +31821,7 @@ static void video_driver_frame(const void *data, unsigned width,
             video_info.monitor_index,
             p_rarch->video_driver_crt_dynamic_super_width,
             video_info.crt_switch_resolution_super);
+      #endif
    }
    else if (!video_info.crt_switch_resolution)
       p_rarch->video_driver_crt_switching_active = false;
@@ -33371,7 +33374,9 @@ static void retroarch_deinit_drivers(
    if (p_rarch->video_driver_crt_switching_active) {
       RARCH_LOG("[CRT]: Getting video info\n");
       RARCH_LOG("[CRT]: About to destroy SR\n");
+      #ifdef HAVE_SR2
       crt_destroy_modes(&p_rarch->crt_switch_st);
+      #endif
    }
 
 }
