@@ -49,7 +49,7 @@ static sr_mode srm;
 
 #if defined(HAVE_VIDEOCORE)
 #include "include/userland/interface/vmcs_host/vc_vchi_gencmd.h"
-static void crt_rpi_switch(int width, int height, float hz, int xoffset);
+static void crt_rpi_switch(int width, int height, float hz, int xoffset, int native_width);
 #endif
 
 static void switch_crt_hz(videocrt_switch_t *p_switch)
