@@ -37,11 +37,13 @@
 #define LIBSWR "libswitchres.dll"
 #endif
 */
+#if !defined(HAVE_VIDEOCORE)
 #include "../deps/switchres/switchres_wrapper.h"
 
 /*static LIBTYPE dlp; */
 /*static srAPI* SRobj;*/
 static sr_mode srm;
+#endif
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -86,7 +88,7 @@ static void set_aspect(videocrt_switch_t *p_switch, unsigned int width,
 
    crt_aspect_ratio_switch(p_switch, scaled_width, scaled_height);
 }
-
+#if !defined(HAVE_VIDEOCORE)
 static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigned int crt_mode, unsigned int super_width)
 {
    const char* err_msg;
@@ -201,7 +203,7 @@ static void switch_res_crt(
 
    }
 }
-
+#endif
 void crt_destroy_modes(videocrt_switch_t *p_switch)
 {
    if (p_switch->sr2_active == true)
@@ -289,6 +291,7 @@ void crt_switch_res_core(
    }
    
 }
+
 /* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
 static void crt_rpi_switch(videocrt_switch_t *p_switch, int width, int height, float hz, int xoffset, int native_width)
