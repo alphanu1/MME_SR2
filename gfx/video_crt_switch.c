@@ -198,9 +198,7 @@ static void switch_res_crt(
       set_aspect(p_switch, width , height, width, height ,1,1);
       video_driver_set_size(width , height); 
       video_driver_apply_state_changes();
-      #if defined(HAVE_VIDEOCORE)
-         crt_rpi_switch(width, height, p_switch->ra_core_hz, 0)
-      #endif
+
    }
 }
 
