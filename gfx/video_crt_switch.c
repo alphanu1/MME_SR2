@@ -223,7 +223,7 @@ void crt_switch_res_core(
       int monitor_index, bool dynamic,
       int super_width)
 {
-
+ 
    if (height != 4 )
    {
       p_switch->menu_active           = false;
@@ -245,8 +245,11 @@ void crt_switch_res_core(
          )
       {
          RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", native_width, height, hz);
-
+         #if defined(HAVE_VIDEOCORE)
+         crt_rpi_switch(width, height, hz, xoffset, native_width);
+         #else
          switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1, super_width);
+         #endif
 
          if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
          {
@@ -290,7 +293,7 @@ void crt_switch_res_core(
 }
 /* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
-static void crt_rpi_switch(int width, int height, float hz, int xoffset)
+static void crt_rpi_switch(int width, int height, float hz, int xoffset, int native_width)
 {
    char buffer[1024];
    VCHI_INSTANCE_T vchi_instance;
@@ -315,12 +318,20 @@ static void crt_rpi_switch(int width, int height, float hz, int xoffset)
    float roundw                        = 0.0f;
    float roundh                        = 0.0f;
    float pixel_clock                   = 0.0f;
+   int xscale                          = 1;
+   int yscale                          = 1;
 
    if (height > 300)
       height = height/2;
 
    /* set core refresh from hz */
    video_monitor_set_refresh_rate(hz);
+
+   set_aspect(videocrt_switch_t *p_switch, width, 
+      height, width, height,
+      roundf(width/native_width), 1)
+
+
 
    /* following code is the mode line generator */
    hsp    = (width * 0.117) - (xoffset*4);
