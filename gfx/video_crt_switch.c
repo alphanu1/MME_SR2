@@ -246,7 +246,7 @@ void crt_switch_res_core(
       {
          RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", native_width, height, hz);
          #if defined(HAVE_VIDEOCORE)
-         crt_rpi_switch(p_switch, width, height, hz, xoffset, native_width);
+         crt_rpi_switch(p_switch, width, height, hz, 0, native_width);
          #else
          switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1, super_width);
          #endif
