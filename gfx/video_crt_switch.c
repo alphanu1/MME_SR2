@@ -329,7 +329,7 @@ static void crt_rpi_switch(int width, int height, float hz, int xoffset, int nat
 
    set_aspect(videocrt_switch_t *p_switch, width, 
       height, width, height,
-      roundf(width/native_width), 1)
+      roundf(width/native_width), 1);
 
 
 
