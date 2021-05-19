@@ -49,7 +49,7 @@ static sr_mode srm;
 
 #if defined(HAVE_VIDEOCORE)
 #include "include/userland/interface/vmcs_host/vc_vchi_gencmd.h"
-static void crt_rpi_switch(int width, int height, float hz, int xoffset, int native_width);
+static void crt_rpi_switch(videocrt_switch_t *p_switch,int width, int height, float hz, int xoffset, int native_width);
 #endif
 
 static void switch_crt_hz(videocrt_switch_t *p_switch)
@@ -246,7 +246,7 @@ void crt_switch_res_core(
       {
          RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", native_width, height, hz);
          #if defined(HAVE_VIDEOCORE)
-         crt_rpi_switch(width, height, hz, xoffset, native_width);
+         crt_rpi_switch(p_switch, width, height, hz, xoffset, native_width);
          #else
          switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1, super_width);
          #endif
@@ -293,7 +293,7 @@ void crt_switch_res_core(
 }
 /* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
-static void crt_rpi_switch(int width, int height, float hz, int xoffset, int native_width)
+static void crt_rpi_switch(videocrt_switch_t *p_switch, int width, int height, float hz, int xoffset, int native_width)
 {
    char buffer[1024];
    VCHI_INSTANCE_T vchi_instance;
@@ -327,7 +327,7 @@ static void crt_rpi_switch(int width, int height, float hz, int xoffset, int nat
    /* set core refresh from hz */
    video_monitor_set_refresh_rate(hz);
 
-   set_aspect(videocrt_switch_t *p_switch, width, 
+   set_aspect(p_switch, width, 
       height, width, height,
       roundf(width/native_width), 1);
 
