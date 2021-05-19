@@ -108,11 +108,13 @@ static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigne
 
 
       sr_init();
+      #if !defined(__STDC__)
       sr_set_log_level (3);
       sr_set_log_callback_info(RARCH_LOG);
       sr_set_log_callback_debug(RARCH_LOG);
       sr_set_log_callback_error(RARCH_LOG);
-
+      #endif
+   
       if (crt_mode == 1)
       {
          sr_set_monitor("arcade_15");

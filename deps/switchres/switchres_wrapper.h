@@ -26,16 +26,16 @@ extern "C" {
 
 #elif defined _WIN32
 #include <windows.h>
-//#include <string>
+/*#include <string> */
 #define LIBTYPE HINSTANCE
 #define OPENLIB(libname) LoadLibrary(TEXT((libname)))
 #define LIBFUNC(lib, fn) GetProcAddress((lib), (fn))
 char* LIBERROR()
 {
-	//Get the error message, if any.
+	/* Get the error message, if any. */
 	DWORD errorMessageID = GetLastError();
 	if(errorMessageID == 0)
-		return NULL; //No error message has been recorded
+		return NULL; /* error message has been recorded */
 
 	LPSTR messageBuffer;
 	FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -61,7 +61,7 @@ char* LIBERROR()
 	#define MODULE_API
 #endif
 
-// That's all the exposed data from Switchres calculation
+/* That's all the exposed data from Switchres calculation */
 typedef struct MODULE_API {
 	int width;
 	int height;
@@ -74,7 +74,7 @@ typedef struct MODULE_API {
 } sr_mode;
 
 
-// Declaration of the wrapper functions
+/* Declaration of the wrapper functions */
 MODULE_API void sr_init();
 MODULE_API void sr_load_ini(char* config);
 MODULE_API void sr_deinit();
@@ -85,14 +85,14 @@ MODULE_API void sr_set_monitor(const char*);
 MODULE_API void sr_set_rotation(unsigned char);
 MODULE_API void sr_set_user_mode(int, int, int);
 
-// Logging related functions
+/* Logging related functions */
 MODULE_API void sr_set_log_level (int);
 MODULE_API void sr_set_log_callback_error(void *);
 MODULE_API void sr_set_log_callback_info(void *);
 MODULE_API void sr_set_log_callback_debug(void *);
 
 
-// Inspired by https://stackoverflow.com/a/1067684
+/* Inspired by https://stackoverflow.com/a/1067684 */
 typedef struct MODULE_API {
     void (*init)(void);
     void (*sr_sr_load_ini)(char*);
