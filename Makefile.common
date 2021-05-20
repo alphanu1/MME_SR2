@@ -2279,7 +2279,6 @@ ifeq ($(HAVE_SR2), 1)
           $(DEPS_DIR)/switchres/log.o \
           $(DEPS_DIR)/switchres/switchres_wrapper.o \
           $(DEPS_DIR)/switchres/edid.o
-
    ifneq ($(findstring Win32,$(OS)),)
       OBJ += $(DEPS_DIR)/switchres/display_windows.o \
              $(DEPS_DIR)/switchres/custom_video_ati_family.o \

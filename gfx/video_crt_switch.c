@@ -37,13 +37,11 @@
 #define LIBSWR "libswitchres.dll"
 #endif
 */
-#if !defined(HAVE_VIDEOCORE)
-#include "../deps/switchres/switchres_wrapper.h"
+#include "switchres_wrapper.h"
 
 /*static LIBTYPE dlp; */
 /*static srAPI* SRobj;*/
 static sr_mode srm;
-#endif
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -51,7 +49,7 @@ static sr_mode srm;
 
 #if defined(HAVE_VIDEOCORE)
 #include "include/userland/interface/vmcs_host/vc_vchi_gencmd.h"
-static void crt_rpi_switch(videocrt_switch_t *p_switch,int width, int height, float hz, int xoffset, int native_width);
+static void crt_rpi_switch(int width, int height, float hz, int xoffset);
 #endif
 
 static void switch_crt_hz(videocrt_switch_t *p_switch)
@@ -88,7 +86,7 @@ static void set_aspect(videocrt_switch_t *p_switch, unsigned int width,
 
    crt_aspect_ratio_switch(p_switch, scaled_width, scaled_height);
 }
-#if !defined(HAVE_VIDEOCORE)
+
 static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigned int crt_mode, unsigned int super_width)
 {
    const char* err_msg;
@@ -110,13 +108,11 @@ static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigne
 
 
       sr_init();
-      #if !defined(__STDC__)
       sr_set_log_level (3);
       sr_set_log_callback_info(RARCH_LOG);
       sr_set_log_callback_debug(RARCH_LOG);
       sr_set_log_callback_error(RARCH_LOG);
-      #endif
-   
+
       if (crt_mode == 1)
       {
          sr_set_monitor("arcade_15");
@@ -200,10 +196,12 @@ static void switch_res_crt(
       set_aspect(p_switch, width , height, width, height ,1,1);
       video_driver_set_size(width , height); 
       video_driver_apply_state_changes();
-
+      #if defined(HAVE_VIDEOCORE)
+         crt_rpi_switch(width, height, p_switch->ra_core_hz, 0)
+      #endif
    }
 }
-#endif
+
 void crt_destroy_modes(videocrt_switch_t *p_switch)
 {
    if (p_switch->sr2_active == true)
@@ -223,7 +221,7 @@ void crt_switch_res_core(
       int monitor_index, bool dynamic,
       int super_width)
 {
- 
+
    if (height != 4 )
    {
       p_switch->menu_active           = false;
@@ -245,11 +243,8 @@ void crt_switch_res_core(
          )
       {
          RARCH_LOG("[CRT]: Requested Reolution: %dx%d@%f \n", native_width, height, hz);
-         #if defined(HAVE_VIDEOCORE)
-         crt_rpi_switch(p_switch, width, height, hz, 0, native_width);
-         #else
+
          switch_res_crt(p_switch, p_switch->ra_core_width, p_switch->ra_core_height , crt_mode, native_width, monitor_index-1, super_width);
-         #endif
 
          if (p_switch->ra_core_hz != p_switch->ra_tmp_core_hz)
          {
@@ -291,10 +286,9 @@ void crt_switch_res_core(
    }
    
 }
-
 /* only used for RPi3 */
 #if defined(HAVE_VIDEOCORE)
-static void crt_rpi_switch(videocrt_switch_t *p_switch, int width, int height, float hz, int xoffset, int native_width)
+static void crt_rpi_switch(int width, int height, float hz, int xoffset)
 {
    char buffer[1024];
    VCHI_INSTANCE_T vchi_instance;
@@ -319,20 +313,12 @@ static void crt_rpi_switch(videocrt_switch_t *p_switch, int width, int height, f
    float roundw                        = 0.0f;
    float roundh                        = 0.0f;
    float pixel_clock                   = 0.0f;
-   int xscale                          = 1;
-   int yscale                          = 1;
 
    if (height > 300)
       height = height/2;
 
    /* set core refresh from hz */
    video_monitor_set_refresh_rate(hz);
-
-   set_aspect(p_switch, width, 
-      height, width, height,
-      roundf(width/native_width), 1);
-
-
 
    /* following code is the mode line generator */
    hsp    = (width * 0.117) - (xoffset*4);
