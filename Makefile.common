@@ -2292,6 +2292,7 @@ ifeq ($(HAVE_SR2), 1)
              $(DEPS_DIR)/switchres/custom_video_xrandr.o \
              $(DEPS_DIR)/switchres/custom_video_drmkms.o
    endif
+   LIBS += -lstdc++
 endif
 
 ifeq ($(HAVE_COMPRESSION), 1)
