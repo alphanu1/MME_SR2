@@ -837,13 +837,13 @@ static bool gfx_ctx_drm_set_video_mode(void *data,
    if(drm->gbm_surface) {
       gfx_ctx_drm_wait_flip(drm, true);
       gbm_surface_release_buffer(drm->gbm_surface, drm->bo);
-      /*
+      
 #ifdef HAVE_EGL
       if(&drm->egl) {
          egl_destroy(&drm->egl);
       }
 #endif
-*/
+
       gbm_surface_destroy(drm->gbm_surface);
       drm->gbm_surface = NULL;
    }
