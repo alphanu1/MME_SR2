@@ -1650,8 +1650,8 @@ static void gl2_renderchain_resolve_extensions(gl_t *gl,
       chain->has_srgb_fbo           = gl_check_capability(GL_CAPS_SRGB_FBO);
 
    /* Use regular textures if we use HW render. */
-   chain->egl_images                = !gl->hw_render_use 
-      && gl_check_capability(GL_CAPS_EGLIMAGE) 
+   chain->egl_images                = !gl->hw_render_use
+      && gl_check_capability(GL_CAPS_EGLIMAGE)
       && gl->ctx_driver->image_buffer_init
       && gl->ctx_driver->image_buffer_init(gl->ctx_data, video);
 }
@@ -1930,7 +1930,7 @@ static void gl2_set_viewport_wrapper(void *data, unsigned viewport_width,
  *
  * gl2_get_fallback_shader_type(RARCH_SHADER_NONE) returns a default shader type.
  * if gl2_get_fallback_shader_type(type) != type, type was not supported.
- * 
+ *
  * Returns: A supported shader type.
  *  If RARCH_SHADER_NONE is returned, no shader backend is supported.
  **/
@@ -2256,9 +2256,9 @@ static void gl2_set_texture_frame(void *data,
       float alpha)
 {
    settings_t *settings            = config_get_ptr();
-   enum texture_filter_type 
-      menu_filter                  = settings->bools.menu_linear_filter 
-      ? TEXTURE_FILTER_LINEAR 
+   enum texture_filter_type
+      menu_filter                  = settings->bools.menu_linear_filter
+      ? TEXTURE_FILTER_LINEAR
       : TEXTURE_FILTER_NEAREST;
    unsigned base_size              = rgb32 ? sizeof(uint32_t) : sizeof(uint16_t);
    gl_t *gl                        = (gl_t*)data;
@@ -2524,7 +2524,7 @@ static void gl2_video_layout_fbo_init(gl_t *gl, unsigned width, unsigned height)
    gl2_fb_texture_2d(RARCH_GL_FRAMEBUFFER, RARCH_GL_COLOR_ATTACHMENT0,
       GL_TEXTURE_2D, gl->video_layout_fbo_texture, 0);
 
-   if (gl2_check_fb_status(RARCH_GL_FRAMEBUFFER) != 
+   if (gl2_check_fb_status(RARCH_GL_FRAMEBUFFER) !=
          RARCH_GL_FRAMEBUFFER_COMPLETE)
       RARCH_LOG("[GL]: Unable to create FBO for video_layout\n");
 
@@ -2824,7 +2824,7 @@ static bool gl2_frame(void *data, const void *frame,
 #ifndef EMSCRIPTEN
    unsigned black_frame_insertion      = video_info->black_frame_insertion;
 #endif
-   bool input_driver_nonblock_state    = video_info->input_driver_nonblock_state; 
+   bool input_driver_nonblock_state    = video_info->input_driver_nonblock_state;
    bool hard_sync                      = video_info->hard_sync;
    unsigned hard_sync_frames           = video_info->hard_sync_frames;
    struct font_params *osd_params      = (struct font_params*)
@@ -3103,9 +3103,9 @@ static bool gl2_frame(void *data, const void *frame,
 #endif
             gl2_pbo_async_readback(gl);
 
-    if (gl->ctx_driver->swap_buffers) 
+    if (gl->ctx_driver->swap_buffers)
         gl->ctx_driver->swap_buffers(gl->ctx_data);
-	
+
  /* Emscripten has to do black frame insertion in its main loop */
 #ifndef EMSCRIPTEN
    /* Disable BFI during fast forward, slow-motion,
@@ -3114,7 +3114,7 @@ static bool gl2_frame(void *data, const void *frame,
          black_frame_insertion
          && !input_driver_nonblock_state
          && !runloop_is_slowmotion
-         && !runloop_is_paused 
+         && !runloop_is_paused
          && !gl->menu_texture_enable)
     {
         unsigned n;
@@ -3124,12 +3124,12 @@ static bool gl2_frame(void *data, const void *frame,
           glClear(GL_COLOR_BUFFER_BIT);
 
           if (gl->ctx_driver->swap_buffers)
-            gl->ctx_driver->swap_buffers(gl->ctx_data); 
-        }  
-    }   
-#endif   	
+            gl->ctx_driver->swap_buffers(gl->ctx_data);
+        }
+    }
+#endif
 
-   /* check if we are fast forwarding or in menu, 
+   /* check if we are fast forwarding or in menu,
     * if we are ignore hard sync */
    if (  gl->have_sync
          && hard_sync
@@ -3994,14 +3994,41 @@ static bool gl2_alive(void *data)
    gl_t         *gl     = (gl_t*)data;
    unsigned temp_width  = gl->video_width;
    unsigned temp_height = gl->video_height;
+   struct retro_hw_render_callback *hwr = NULL;
+
 
    gl->ctx_driver->check_window(gl->ctx_data,
          &quit, &resize, &temp_width, &temp_height);
 
    if (quit)
       gl->quitting = true;
-   else if (resize)
+   else if (resize) {
       gl->should_resize = true;
+      // vv semble inutile, c'est de moi
+      // les shaders activent l'overlay de RA
+      // les textures, c'est le jeu
+      //renderchain_gl2_init_first(&gl->renderchain_data);
+      //gl2_renderchain_restore_default_state(gl);
+      hwr = video_driver_get_hw_context();
+
+      if (!gl2_shader_init(gl, gl->ctx_driver, hwr))
+      {
+         RARCH_ERR("[GL]: Shader initialization failed.\n");
+         return false;
+      }
+      gl2_set_shader_viewports(gl);
+      gl2_init_textures(gl);
+      gl2_init_textures_data(gl);
+      gl2_renderchain_init(gl,
+         (gl2_renderchain_data_t*)gl->renderchain_data,
+         gl->tex_w, gl->tex_h);
+      if (gl->hw_render_use &&
+            !gl2_renderchain_init_hw_render(gl, (gl2_renderchain_data_t*)gl->renderchain_data, gl->tex_w, gl->tex_h))
+      {
+         RARCH_ERR("[GL]: Hardware rendering context initialization failed.\n");
+         return false;
+      }
+   }
 
    ret = !gl->quitting;
 
@@ -4526,7 +4553,7 @@ static uintptr_t gl2_load_texture(void *video_data, void *data,
    return id;
 }
 
-static void gl2_unload_texture(void *data, 
+static void gl2_unload_texture(void *data,
       bool threaded, uintptr_t id)
 {
    GLuint glid;

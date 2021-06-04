@@ -16,6 +16,7 @@
 #include "switchres.h"
 #include "switchres_wrapper.h"
 #include "log.h"
+#include "modeline.h"
 #include <stdio.h>
 #include <locale>
 #ifdef __cplusplus
@@ -37,11 +38,11 @@ MODULE_API void sr_load_ini(char* config) {
 }
 
 
-MODULE_API unsigned char sr_init_disp(const char* scr) {
+MODULE_API unsigned char sr_init_disp(const char* scr, int i) {
 	if (scr)
 		swr->set_screen(scr);
 	swr->add_display();
-	if (!swr->display()->init())
+	if (i > 0 && !swr->display()->init())
 		return 0;
 	return 1;
 }
@@ -66,8 +67,25 @@ MODULE_API void sr_set_user_mode(int width, int height, int refresh) {
 }
 
 
+void best_mode_to_sr_modeline(display_manager* disp, sr_modeline* modeline)
+{
+	modeline->pclock  = disp->best_mode()->pclock;
+	modeline->hactive = disp->best_mode()->hactive;
+	modeline->hbegin  = disp->best_mode()->hbegin;
+	modeline->hend    = disp->best_mode()->hend;
+	modeline->htotal  = disp->best_mode()->htotal;
+	modeline->vactive = disp->best_mode()->vactive;
+	modeline->vbegin  = disp->best_mode()->vbegin;
+	modeline->vend    = disp->best_mode()->vend;
+	modeline->vtotal  = disp->best_mode()->vtotal;
+	modeline->vfreq   = disp->best_mode()->vfreq;
+	modeline->type    = disp->best_mode()->type;
+}
+
+
 void disp_best_mode_to_sr_mode(display_manager* disp, sr_mode* srm)
 {
+	sr_modeline* srml = &(srm->modeline);
 	srm->width = disp->width();
 	srm->height = disp->height();
 	srm->refresh = disp->v_freq();
@@ -76,6 +94,7 @@ void disp_best_mode_to_sr_mode(display_manager* disp, sr_mode* srm)
 	srm->x_scale = disp->x_scale();
 	srm->y_scale = disp->y_scale();
 	srm->interlace = (disp->is_interlaced() ? 105 : 0);
+	best_mode_to_sr_modeline(disp, &(srm->modeline));
 }
 
 

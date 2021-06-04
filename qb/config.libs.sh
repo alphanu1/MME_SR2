@@ -680,7 +680,7 @@ check_enabled V4L2 VIDEOPROCESSOR 'video processor' 'Video4linux2 is' true
 
 if [ "$HAVE_CXX11" = 'yes' ]; then
    if [ "$OS" = 'Linux' ]; then
-      check_enabled 'VIDEOCORE X11' SR2 'CRT modeswitching' 'CRT is' true
+      check_enabled 'VIDEOCORE KMS X11' SR2 'CRT modeswitching' 'CRT is' true
    else
       check_platform Win32 SR2 'CRT modeswitching is' true
    fi

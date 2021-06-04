@@ -75,6 +75,24 @@ char* LIBERROR()
 #endif
 
 /* That's all the exposed data from Switchres calculation */
+typedef struct MODULE_API
+{
+	uint64_t    pclock;
+	int    hactive;
+	int    hbegin;
+	int    hend;
+	int    htotal;
+	int    vactive;
+	int    vbegin;
+	int    vend;
+	int    vtotal;
+	//
+	double vfreq;
+	//
+	int    type;
+	//
+} sr_modeline;
+
 typedef struct MODULE_API {
 	int width;
 	int height;
@@ -84,6 +102,7 @@ typedef struct MODULE_API {
 	int x_scale;
 	int y_scale;
 	unsigned char interlace;
+	sr_modeline modeline;
 } sr_mode;
 
 
@@ -91,7 +110,7 @@ typedef struct MODULE_API {
 MODULE_API void sr_init();
 MODULE_API void sr_load_ini(char* config);
 MODULE_API void sr_deinit();
-MODULE_API unsigned char sr_init_disp(const char* src);
+MODULE_API unsigned char sr_init_disp(const char* src, int i);
 MODULE_API unsigned char sr_add_mode(int, int, double, unsigned char, sr_mode*);
 MODULE_API unsigned char sr_switch_to_mode(int, int, double, unsigned char, sr_mode*);
 MODULE_API void sr_set_monitor(const char*);
@@ -110,7 +129,7 @@ typedef struct MODULE_API {
     void (*init)(void);
     void (*sr_sr_load_ini)(char*);
     void (*deinit)(void);
-    unsigned char (*sr_init_disp)(const char*);
+    unsigned char (*sr_init_disp)(const char*, int);
     unsigned char (*sr_add_mode)(int, int, double, unsigned char, sr_mode*);
     unsigned char (*sr_switch_to_mode)(int, int, double, unsigned char, sr_mode*);
     void (*sr_set_monitor)(const char*);

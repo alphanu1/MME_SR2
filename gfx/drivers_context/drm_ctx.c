@@ -118,47 +118,107 @@ typedef struct hdmi_timings
 static enum gfx_ctx_api drm_api           = GFX_CTX_NONE;
 static drmModeModeInfo gfx_ctx_crt_switch_mode;
 
+static float mode_vrefresh(drmModeModeInfo *mode)
+{
+	return  mode->clock * 1000.00
+			/ (mode->htotal * mode->vtotal);
+}
+
+static void dump_mode(drmModeModeInfo *mode, int index)
+{
+	RARCH_LOG("  #%i %s %.2f %d %d %d %d %d %d %d %d %d\n",
+	       index,
+	       mode->name,
+	       mode_vrefresh(mode),
+	       mode->hdisplay,
+	       mode->hsync_start,
+	       mode->hsync_end,
+	       mode->htotal,
+	       mode->vdisplay,
+	       mode->vsync_start,
+	       mode->vsync_end,
+	       mode->vtotal,
+	       mode->clock);
+}
+
 /* Load custom hdmi timings from config */
 bool gfx_ctx_drm_load_mode(drmModeModeInfoPtr modeInfo)
 {
-   int ret;
+   int ret, count=0;
    hdmi_timings_t timings;
    settings_t *settings = config_get_ptr();
    char *crt_switch_timings = settings->arrays.crt_switch_timings;
 
    if(modeInfo != NULL && !string_is_empty(crt_switch_timings)) {
-      ret = sscanf(crt_switch_timings, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-                   &timings.h_active_pixels, &timings.h_sync_polarity, &timings.h_front_porch,
-                   &timings.h_sync_pulse, &timings.h_back_porch,
-                   &timings.v_active_lines, &timings.v_sync_polarity, &timings.v_front_porch,
-                   &timings.v_sync_pulse, &timings.v_back_porch,
-                   &timings.v_sync_offset_a, &timings.v_sync_offset_b, &timings.pixel_rep, &timings.frame_rate,
-                   &timings.interlaced, &timings.pixel_freq, &timings.aspect_ratio);
-      if (ret != 17) {
-         RARCH_ERR("[DRM]: malformed mode requested: %s\n", crt_switch_timings);
-         return false;
+      while(*crt_switch_timings) if (*crt_switch_timings++ == ' ') ++count;
+      RARCH_LOG("[CRT] found %d occurences of space in the modeline\n", count);
+      crt_switch_timings = settings->arrays.crt_switch_timings;
+      RARCH_LOG("[CRT] %s\n", crt_switch_timings);
+      if (count == 10 ) {
+         RARCH_LOG("[DRM]: got a DRM Modeline\n");
+         ret = sscanf(crt_switch_timings, "%d %d %d %d %d %d %d %d %d %d %d",
+                      &timings.pixel_freq,
+                      &timings.h_active_pixels, &timings.h_front_porch, &timings.h_sync_pulse, &timings.h_back_porch,
+                      &timings.v_active_lines, &timings.v_front_porch, &timings.v_sync_pulse, &timings.v_back_porch,
+                      &timings.frame_rate, &timings.interlaced);
+         if (ret != 11) {
+            RARCH_ERR("[DRM]: malformed mode requested: %s\n", crt_switch_timings);
+            return false;
+         }
+         memset(modeInfo, 0, sizeof(drmModeModeInfo));
+         modeInfo->clock = timings.pixel_freq;
+         modeInfo->hdisplay = timings.h_active_pixels;
+         modeInfo->hsync_start = timings.h_front_porch;
+         modeInfo->hsync_end = timings.h_sync_pulse;
+         modeInfo->htotal = timings.h_back_porch;
+         modeInfo->hskew = 0;
+         modeInfo->vdisplay = timings.v_active_lines;
+         modeInfo->vsync_start = timings.v_front_porch;
+         modeInfo->vsync_end = timings.v_sync_pulse;
+         modeInfo->vtotal = timings.v_back_porch;
+         modeInfo->vscan = 0;
+         modeInfo->vrefresh = timings.frame_rate;
+         modeInfo->flags = timings.interlaced ? DRM_MODE_FLAG_INTERLACE : 0;
+         modeInfo->flags |= DRM_MODE_FLAG_NVSYNC;
+         modeInfo->flags |= DRM_MODE_FLAG_NHSYNC;
+         modeInfo->type = 0;
+         snprintf(modeInfo->name, DRM_DISPLAY_MODE_LEN, "CRT_%ux%u_%u",
+               modeInfo->hdisplay, modeInfo->vdisplay, modeInfo->vrefresh);
+      } else if (count == 16) {
+         ret = sscanf(crt_switch_timings, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+                      &timings.h_active_pixels, &timings.h_sync_polarity, &timings.h_front_porch,
+                      &timings.h_sync_pulse, &timings.h_back_porch,
+                      &timings.v_active_lines, &timings.v_sync_polarity, &timings.v_front_porch,
+                      &timings.v_sync_pulse, &timings.v_back_porch,
+                      &timings.v_sync_offset_a, &timings.v_sync_offset_b, &timings.pixel_rep, &timings.frame_rate,
+                      &timings.interlaced, &timings.pixel_freq, &timings.aspect_ratio);
+         if (ret != 17) {
+            RARCH_ERR("[DRM]: malformed mode requested: %s\n", crt_switch_timings);
+            return false;
+         }
+         memset(modeInfo, 0, sizeof(drmModeModeInfo));
+         modeInfo->clock = timings.pixel_freq / 1000;
+         modeInfo->hdisplay = timings.h_active_pixels;
+         modeInfo->hsync_start = modeInfo->hdisplay + timings.h_front_porch;
+         modeInfo->hsync_end = modeInfo->hsync_start + timings.h_sync_pulse;
+         modeInfo->htotal = modeInfo->hsync_end + timings.h_back_porch;
+         modeInfo->hskew = 0;
+         modeInfo->vdisplay = timings.v_active_lines;
+         modeInfo->vsync_start = modeInfo->vdisplay + (timings.v_front_porch * (timings.interlaced ? 2 : 1));
+         modeInfo->vsync_end = modeInfo->vsync_start + (timings.v_sync_pulse * (timings.interlaced ? 2 : 1));
+         modeInfo->vtotal = modeInfo->vsync_end + (timings.v_back_porch * (timings.interlaced ? 2 : 1));
+         modeInfo->vscan = 0; /* TODO: ?? */
+         modeInfo->vrefresh = timings.frame_rate;
+         modeInfo->flags = timings.interlaced ? DRM_MODE_FLAG_INTERLACE : 0;
+         modeInfo->flags |= timings.v_sync_polarity ? DRM_MODE_FLAG_NVSYNC : DRM_MODE_FLAG_PVSYNC;
+         modeInfo->flags |= timings.h_sync_polarity ? DRM_MODE_FLAG_NHSYNC : DRM_MODE_FLAG_PHSYNC;
+         modeInfo->type = 0;
+      } else {
+         RARCH_ERR("[DRM]: Unknown crt_switch_timings timing\n", crt_switch_timings);
       }
 
-      memset(modeInfo, 0, sizeof(drmModeModeInfo));
-      modeInfo->clock = timings.pixel_freq / 1000;
-      modeInfo->hdisplay = timings.h_active_pixels;
-      modeInfo->hsync_start = modeInfo->hdisplay + timings.h_front_porch;
-      modeInfo->hsync_end = modeInfo->hsync_start + timings.h_sync_pulse;
-      modeInfo->htotal = modeInfo->hsync_end + timings.h_back_porch;
-      modeInfo->hskew = 0;
-      modeInfo->vdisplay = timings.v_active_lines;
-      modeInfo->vsync_start = modeInfo->vdisplay + (timings.v_front_porch * (timings.interlaced ? 2 : 1));
-      modeInfo->vsync_end = modeInfo->vsync_start + (timings.v_sync_pulse * (timings.interlaced ? 2 : 1));
-      modeInfo->vtotal = modeInfo->vsync_end + (timings.v_back_porch * (timings.interlaced ? 2 : 1));
-      modeInfo->vscan = 0; /* TODO: ?? */
-      modeInfo->vrefresh = timings.frame_rate;
-      modeInfo->flags = timings.interlaced ? DRM_MODE_FLAG_INTERLACE : 0;
-      modeInfo->flags |= timings.v_sync_polarity ? DRM_MODE_FLAG_NVSYNC : DRM_MODE_FLAG_PVSYNC;
-      modeInfo->flags |= timings.h_sync_polarity ? DRM_MODE_FLAG_NHSYNC : DRM_MODE_FLAG_PHSYNC;
-      modeInfo->type = 0;
-      snprintf(modeInfo->name, DRM_DISPLAY_MODE_LEN, "CRT_%ux%u_%u",
-               modeInfo->hdisplay, modeInfo->vdisplay, modeInfo->vrefresh);
 
+      dump_mode(modeInfo, 0);
       return true;
    }
 
@@ -217,7 +277,14 @@ static void gfx_ctx_drm_swap_interval(void *data, int interval)
 static void gfx_ctx_drm_check_window(void *data, bool *quit,
       bool *resize, unsigned *width, unsigned *height)
 {
+   gfx_ctx_drm_data_t *drm = (gfx_ctx_drm_data_t*)data;
+
    *resize = false;
+   if (drm->fb_width != *width || drm->fb_height != *height) {
+      *width  = drm->fb_width;
+      *height = drm->fb_height;
+      *resize = true;
+   }
    *quit   = (bool)frontend_driver_get_signal_handler_state();
 }
 
@@ -704,7 +771,6 @@ static bool gfx_ctx_drm_set_video_mode(void *data,
 
    if (!drm)
       return false;
-
    frontend_driver_install_signal_handler();
 
    /* If we use black frame insertion,
@@ -720,6 +786,7 @@ static bool gfx_ctx_drm_set_video_mode(void *data,
    else
    {
       /* check if custom hdmi timings were asked */
+      gfx_ctx_drm_load_mode(&gfx_ctx_crt_switch_mode);
       if(gfx_ctx_crt_switch_mode.vdisplay > 0)
       {
          RARCH_LOG("[DRM]: custom mode requested: %s\n", gfx_ctx_crt_switch_mode.name);
@@ -756,7 +823,6 @@ static bool gfx_ctx_drm_set_video_mode(void *data,
          }
       }
    }
-
    if (!g_drm_mode)
    {
       RARCH_ERR("[KMS/EGL]: Did not find suitable video mode for %u x %u.\n",
@@ -766,6 +832,21 @@ static bool gfx_ctx_drm_set_video_mode(void *data,
 
    drm->fb_width    = g_drm_mode->hdisplay;
    drm->fb_height   = g_drm_mode->vdisplay;
+
+   /* Don't pile up surfaces + frambuffers + egl surfaces */
+   if(drm->gbm_surface) {
+      gfx_ctx_drm_wait_flip(drm, true);
+      gbm_surface_release_buffer(drm->gbm_surface, drm->bo);
+      /*
+#ifdef HAVE_EGL
+      if(&drm->egl) {
+         egl_destroy(&drm->egl);
+      }
+#endif
+*/
+      gbm_surface_destroy(drm->gbm_surface);
+      drm->gbm_surface = NULL;
+   }
 
    /* Create GBM surface. */
    drm->gbm_surface = gbm_surface_create(
