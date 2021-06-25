@@ -29994,6 +29994,11 @@ void* video_display_server_init(enum rarch_display_type type)
          current_display_server = &dispserv_x11;
 #endif
          break;
+      case RARCH_DISPLAY_KMS:
+#if defined(HAVE_KMS)
+         current_display_server = &dispserv_kms;
+#endif
+         break;
       default:
 #if defined(ANDROID)
          current_display_server = &dispserv_android;
