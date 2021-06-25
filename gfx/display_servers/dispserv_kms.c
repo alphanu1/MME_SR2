@@ -39,7 +39,7 @@ typedef struct
    unsigned orig_refresh;
 } dispserv_kms_t;
 
-const video_display_server_t dispserv_android = {
+const video_display_server_t dispserv_kms = {
    NULL,
    NULL,
    NULL,
@@ -50,5 +50,5 @@ const video_display_server_t dispserv_android = {
    NULL, /* get_output_options */
    NULL,
    NULL, /* get_screen_orientation */
-
+   "kms"
 };
