@@ -174,16 +174,16 @@ static bool crt_sr2_init(videocrt_switch_t *p_switch, int monitor_index, unsigne
       RARCH_LOG("[CRT]: SR init_disp \n");
       if (monitor_index+1 > 0)
       {
-         RARCH_LOG("SRobj: RA Monitor Index: %s\n",mindex);
+         RARCH_LOG("SRobj: RA Monitor Index Manual: %s\n",mindex);
          p_switch->rtn = sr_init_disp(mindex); 
-         RARCH_LOG("[CRT]: SR Disp Monitor Index: %s  \n", mindex);
+         RARCH_LOG("[CRT]: SR Disp Monitor Index Manual: %s  \n", mindex);
       }
 
       if (monitor_index == -1)
       {
-         RARCH_LOG("SRobj: RA Monitor Index: %s\n",NULL);
-         p_switch->rtn = sr_init_disp(NULL);
-         RARCH_LOG("[CRT]: SR Disp Monitor Index: Auto  \n");
+         RARCH_LOG("SRobj: RA Monitor Index Auto: %s\n","auto");
+         p_switch->rtn = sr_init_disp("auto");
+         RARCH_LOG("[CRT]: SR Disp Monitor Index Auto: Auto  \n");
       }
 
       RARCH_LOG("[CRT]: SR rtn %d \n", p_switch->rtn);
