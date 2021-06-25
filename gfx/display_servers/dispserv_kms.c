@@ -28,6 +28,17 @@
 #include "../../config.h"
 #endif
 
+typedef struct
+{
+   bool decorations;
+   int progress;
+   int crt_center;
+   unsigned opacity;
+   unsigned orig_width;
+   unsigned orig_height;
+   unsigned orig_refresh;
+} dispserv_kms_t;
+
 const video_display_server_t dispserv_android = {
    NULL,
    NULL,
