@@ -6181,6 +6181,7 @@ int action_cb_push_dropdown_item_resolution(const char *path,
    unsigned width       = 0;
    unsigned height      = 0;
    unsigned refreshrate = 0;
+   videocrt_t crt;
 
    strlcpy(str, path, sizeof(str));
    pch            = strtok(str, "x");
@@ -6194,7 +6195,7 @@ int action_cb_push_dropdown_item_resolution(const char *path,
       refreshrate = (unsigned)strtoul(pch, NULL, 0);
 
    if (video_display_server_set_resolution(width, height,
-         refreshrate, (float)refreshrate, 0, 0, 0, 0))
+         refreshrate, (float)refreshrate, 0, 0, 0, 0, crt))
    {
       settings_t *settings = config_get_ptr();
 

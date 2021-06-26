@@ -220,6 +220,8 @@ static void switch_res_crt(
    const char* err_msg;
    int w = native_width, h = height;
    double rr = p_switch->ra_core_hz;
+
+   videocrt_t crt_kms;
    
    if (crt_sr2_init(p_switch, monitor_index, crt_mode, super_width)) /* Checked SR2 is loded if not Load it */
    {
@@ -238,7 +240,28 @@ static void switch_res_crt(
          crt_adjust_sr_ini(p_switch);
          crt_check_hh_core(p_switch);
       }
+
       ret =   sr_switch_to_mode(w, h, rr, interlace, &srm);
+      
+      /* use dosplay server for KMS  upadet display server to take new struct*/
+
+      crt_kms.crt_core_width = srm.width;
+      crt_kms.crt_core_height = srm.height;
+      /*crt_kms.crt_p_clock = srm.clock; */
+      
+      #ifdef HAVE_KMS
+         video_display_server_set_resolution(srm.width, srm.height,
+         srm.refresh,
+         srm.refresh,
+         0,
+         0,
+         0,
+         0,
+         crt_kms);
+      #endif
+
+      
+
       if(!ret) 
       {
          RARCH_LOG("[CRT]: SR failed to switch mode");

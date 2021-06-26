@@ -22,7 +22,8 @@
 
 #include <sys/types.h>
 #include <unistd.h>
-#include <X11/Xlib.h>
+
+#include "../../verbosity.h"
 
 #ifdef HAVE_CONFIG_H
 #include "../../config.h"
@@ -39,16 +40,27 @@ typedef struct
    unsigned orig_refresh;
 } dispserv_kms_t;
 
+static bool kms_display_server_set_resolution(void *data,
+      unsigned width, unsigned height, int int_hz, float hz,
+      int center, int monitor_index, int xoffset, int padjust,
+      videocrt_t crt_data)
+{
+      RARCH_LOG("[KMS] KMS dispserv acrive. Attempting to switch resolution to %dx%d", crt_data.crt_core_width, crt_data.crt_core_height);
+
+      return true;
+}
+
 const video_display_server_t dispserv_kms = {
    NULL,
    NULL,
    NULL,
    NULL,
    NULL, /* set_window_decorations */
-   NULL, /* set_resolution */
+   kms_display_server_set_resolution, /* set_resolution */
    NULL, /* get_resolution_list */
    NULL, /* get_output_options */
    NULL,
    NULL, /* get_screen_orientation */
+   NULL,
    "kms"
 };

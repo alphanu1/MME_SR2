@@ -41,6 +41,22 @@ typedef struct video_display_config
    bool current;
 } video_display_config_t;
 
+typedef struct videocrt
+{
+   double crt_p_clock;
+   unsigned crt_core_width;
+   unsigned crt_core_height;
+   unsigned crt_h_front_porch;
+   unsigned crt_h_sync;
+   unsigned crt_h_back_porch;
+   unsigned crt_v_front_porch;
+   unsigned crt_v_sync;
+   unsigned crt_v_back_porch;
+   float crt_core_hz;
+
+} videocrt_t;
+
+
 typedef struct video_display_server
 {
    void *(*init)(void);
@@ -49,7 +65,7 @@ typedef struct video_display_server
    bool (*set_window_progress)(void *data, int progress, bool finished);
    bool (*set_window_decorations)(void *data, bool on);
    bool (*set_resolution)(void *data, unsigned width,
-         unsigned height, int int_hz, float hz, int center, int monitor_index, int xoffset, int padjust );
+         unsigned height, int int_hz, float hz, int center, int monitor_index, int xoffset, int padjust, videocrt_t crt_data );
    void *(*get_resolution_list)(void *data,
          unsigned *size);
    const char *(*get_output_options)(void *data);
@@ -73,7 +89,7 @@ bool video_display_server_set_window_decorations(bool on);
 
 bool video_display_server_set_resolution(
       unsigned width, unsigned height,
-      int int_hz, float hz, int center, int monitor_index, int xoffset, int padjust);
+      int int_hz, float hz, int center, int monitor_index, int xoffset, int padjust, videocrt_t crt_data);
 
 void *video_display_server_get_resolution_list(unsigned *size);
 

@@ -83,7 +83,8 @@ static void x11_display_server_close_display(dispserv_x11_t *dispserv,
 
 static bool x11_display_server_set_resolution(void *data,
       unsigned width, unsigned height, int int_hz, float hz,
-      int center, int monitor_index, int xoffset, int padjust)
+      int center, int monitor_index, int xoffset, int padjust,
+      videocrt_t crt_data)
 {
    int m, screen;
    Window window;
